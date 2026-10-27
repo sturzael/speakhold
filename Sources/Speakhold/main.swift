@@ -177,7 +177,8 @@ if let i = args.firstIndex(of: "--meeting-from-files"), i + 2 < args.count {
     let sem = DispatchSemaphore(value: 0)
     Task {
         await t.prepare(model: s.model.rawValue)
-        let session = MeetingSession(title: "Test meeting")
+        let title = args.firstIndex(of: "--title").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
+        let session = MeetingSession(title: title ?? "Test meeting")
         session.capture.load(micPath: args[i + 1], systemPath: args[i + 2])
         if args.contains("--marks") { session.marks = [5, 12] }
         if let n = args.firstIndex(of: "--notes"), n + 1 < args.count { session.userNotes = args[n + 1] }

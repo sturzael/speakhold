@@ -294,6 +294,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     @available(macOS 14.2, *)
     private func stopMeeting(_ session: MeetingSession) {
         meetingTimer?.invalidate(); meetingTimer = nil
+        session.stopCapture()   // release the microphone and the tap before anything that can wait
         meeting = nil
         meetingItem?.title = "Record meeting"
         meetingState.active = false
@@ -314,9 +315,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         overlay.model.onUndo = nil
         overlay.show(.done("Writing the notes in the background"))
         hideSoon(3)
+        // Ask for notification permission without waiting on the answer: the prompt once held the whole job
+        // (and the microphone) until it was clicked.
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         Task.detached { [weak self] in
             do {
-                try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
                 let url = try await session.finish(transcriber: engine, diarizer: dia, settings: s) { [weak self] stage, fraction in
                     DispatchQueue.main.async { self?.updateJob(id, title: session.title, stage: stage, fraction: fraction) }
                 }

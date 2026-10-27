@@ -67,6 +67,8 @@ final class MeetingSession {
     }
 
     func start() throws { try capture.start() }
+    /// Stop the hardware now; `finish` reads the files back. Called on stop so the microphone is released at once.
+    func stopCapture() { capture.stop() }
 
     var elapsed: TimeInterval { Date().timeIntervalSince(started) }
     var elapsedLabel: String {
