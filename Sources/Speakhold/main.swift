@@ -24,7 +24,7 @@ import UniformTypeIdentifiers
     }
     m.phase = .transcribing
     for _ in 0..<12 { snap() }
-    m.phase = .done("Can you check the HubSpot sync before standup?")
+    m.phase = .done("")
     for _ in 0..<24 { snap() }
     guard let dest = CGImageDestinationCreateWithURL(URL(fileURLWithPath: path) as CFURL, UTType.gif.identifier as CFString, frames.count, nil) else { return }
     CGImageDestinationSetProperties(dest, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
@@ -38,7 +38,7 @@ import UniformTypeIdentifiers
 @MainActor func renderOverlay(dir: String) {
     let states: [(String, OverlayModel.Phase)] = [
         ("idle", .idle), ("listening", .listening), ("transcribing", .transcribing), ("cleaning", .cleaning),
-        ("done", .done("Can you check the sync before standup?")),
+        ("done", .done("")),
         ("error", .error("Speech model is still loading. Try again in a moment."))]
     for (name, phase) in states {
         let m = OverlayModel(); m.phase = phase

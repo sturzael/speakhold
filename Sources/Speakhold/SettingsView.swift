@@ -241,7 +241,7 @@ struct LevelMeter: View {
             phase = .transcribing
             text = s.livePreview ? words.dropLast().joined(separator: " ") : ""
         default:
-            phase = .done(sample)
+            phase = .done("")
         }
         if model.phase != phase { withAnimation(Ink.morph) { model.phase = phase } }
         if model.liveText != text { model.liveText = text }

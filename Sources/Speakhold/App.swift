@@ -703,8 +703,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                     Paster.paste(text)
                     History.shared.add(text, app: app)
                     overlay.model.onUndo = { [weak self] in self?.undoLast() }
-                    overlay.show(.done(text))
-                    hideSoon(3)
+                    overlay.show(.done(""))   // just the tick; the text is in the app, and Undo stays on the pill
+                    hideSoon(1.5)
                 }
             } catch {
                 await MainActor.run { overlay.model.canRetry = true; overlay.show(.error(error.localizedDescription)); hideSoon(4) }

@@ -22,11 +22,19 @@ final class OverlayModel: ObservableObject {
     var onAccept: (() -> Void)?
     var onHover: ((Bool) -> Void)?
 
+    /// Raw levels arrive on whatever scale the microphone's gain gives (a quiet USB mic peaks around 0.4, a hot one
+    /// near 1), so track the quiet floor and the recent peak and span the bars between them. Speech then fills the
+    /// meter whatever the mic, and silence sits on the floor instead of a flat half-height line.
+    private var floor: Float = 1
+    private var peak: Float = 0
     func push(level: Float) {
+        floor = level < floor ? level : floor + 0.002
+        peak = level > peak ? level : max(floor + 0.12, peak - 0.004)
+        let n = max(0, min(1, (level - floor - 0.03) / max(0.12, peak - floor - 0.03)))
         levels.removeFirst()
-        levels.append(max(0.05, level))
+        levels.append(max(0.06, pow(n, 0.8)))
     }
-    func resetLevels() { levels = Array(repeating: 0.05, count: 28) }
+    func resetLevels() { levels = Array(repeating: 0.06, count: 28); floor = 1; peak = 0 }
 }
 
 /// Palette lifted from the MorrisPill lozenge (navy-slate ink, hairline, mint / amber / red status colours).
@@ -105,7 +113,7 @@ struct OverlayView: View {
 
     private func words(_ s: String) -> some View {
         Text(s)
-            .font(.system(size: 13.5))
+            .font(.system(size: 13))
             .lineLimit(1)
             .truncationMode(.head)   // like Willow: the newest words stay visible, the start scrolls off
             .foregroundStyle(Ink.text)
@@ -129,7 +137,7 @@ struct OverlayView: View {
                 if model.locked {
                     Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold)).foregroundStyle(Ink.mint)
                 }
-                Waveform(levels: Array(model.levels.suffix(14))).frame(height: 18)
+                Waveform(levels: Array(model.levels.suffix(16))).frame(height: 14)
                 if !model.liveText.isEmpty { words(model.liveText) }
             case .transcribing:
                 ThinkingDots(color: Ink.mint)
@@ -137,9 +145,9 @@ struct OverlayView: View {
             case .cleaning:
                 ThinkingDots(color: Ink.amber)
                 if !model.liveText.isEmpty { words(model.liveText + "…") }
-            case .done(let text):
+            case .done(let text):   // dictation passes "" : the tick is the whole message, the words are already in the app
                 Image(systemName: "checkmark").font(.system(size: 12, weight: .bold)).foregroundStyle(Ink.mint)
-                words(text)
+                if !text.isEmpty { words(text) }
                 if model.onUndo != nil { chip("Undo") { model.onUndo?() } }
             case .error(let msg):
                 Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Ink.red)
@@ -158,8 +166,8 @@ struct OverlayView: View {
         }
         .id(phaseKey)
         .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: unitAnchor)))
-        .padding(.horizontal, isIdle ? 8 : 14)
-        .padding(.vertical, isIdle ? 8 : 10)
+        .padding(.horizontal, isIdle ? 8 : 11)
+        .padding(.vertical, isIdle ? 8 : 7)
         .background(pillBackground)
         .background(GeometryReader { g in Color.clear.preference(key: PillFrameKey.self, value: g.frame(in: .global)) })
         .onPreferenceChange(PillFrameKey.self) { model.pillFrame = $0 }
@@ -202,7 +210,7 @@ struct Waveform: View {
             ForEach(Array(levels.enumerated()), id: \.offset) { _, l in
                 RoundedRectangle(cornerRadius: 1.5)
                     .fill(Ink.mint)
-                    .frame(width: 2.5, height: max(3, CGFloat(l) * 18))
+                    .frame(width: 2.5, height: max(2.5, CGFloat(l) * 14))
             }
         }
         .animation(.linear(duration: 0.05), value: levels)
