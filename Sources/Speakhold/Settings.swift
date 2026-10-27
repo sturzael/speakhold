@@ -166,7 +166,7 @@ final class Settings: ObservableObject {
         language = d.string(forKey: "language") ?? "en"
         inputDeviceUID = d.string(forKey: "inputDeviceUID") ?? ""
         showIdlePill = d.object(forKey: "showIdlePill") as? Bool ?? true
-        livePreview = d.object(forKey: "livePreview") as? Bool ?? true
+        livePreview = d.object(forKey: "livePreview") as? Bool ?? false   // off: the pill stays a short glowing bar
         pillPosition = PillPosition(rawValue: d.string(forKey: "pillPosition") ?? "") ?? .rightEdge
         showInDock = d.object(forKey: "showInDock") as? Bool ?? true
         meetingsFolder = d.string(forKey: "meetingsFolder") ?? ""

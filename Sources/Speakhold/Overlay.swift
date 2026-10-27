@@ -111,12 +111,14 @@ struct OverlayView: View {
         .buttonStyle(.plain)
     }
 
+    /// Capped so the pill never runs across the screen; the newest words stay visible, the start scrolls off.
     private func words(_ s: String) -> some View {
         Text(s)
             .font(.system(size: 13))
             .lineLimit(1)
-            .truncationMode(.head)   // like Willow: the newest words stay visible, the start scrolls off
+            .truncationMode(.head)
             .foregroundStyle(Ink.text)
+            .frame(maxWidth: 240, alignment: .trailing)
     }
 
     /// Idle glyph: three still bars, mint once the model is loaded.
@@ -137,8 +139,8 @@ struct OverlayView: View {
                 if model.locked {
                     Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold)).foregroundStyle(Ink.mint)
                 }
-                Waveform(levels: Array(model.levels.suffix(16))).frame(height: 14)
-                if !model.liveText.isEmpty { words(model.liveText) }
+                Waveform(levels: Array(model.levels.suffix(22))).frame(height: 14)
+                if !model.liveText.isEmpty { words(model.liveText) }   // only with "Show words in the pill" on
             case .transcribing:
                 ThinkingDots(color: Ink.mint)
                 if !model.liveText.isEmpty { words(model.liveText + "…") }
@@ -213,6 +215,8 @@ struct Waveform: View {
                     .frame(width: 2.5, height: max(2.5, CGFloat(l) * 14))
             }
         }
+        .shadow(color: Ink.mint.opacity(0.75), radius: 3)   // the neon glow while listening
+        .shadow(color: Ink.mint.opacity(0.35), radius: 8)
         .animation(.linear(duration: 0.05), value: levels)
     }
 }

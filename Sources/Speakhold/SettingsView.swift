@@ -384,7 +384,7 @@ struct SettingsView: View {
                 InkRow(label: "Keep a small tab on screen while idle") {
                     Toggle("", isOn: $settings.showIdlePill).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
-                InkRow(label: "Show words in the pill while you speak") {
+                InkRow(label: "Show words in the pill while you speak (makes it wide)") {
                     Toggle("", isOn: $settings.livePreview).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
             }
