@@ -32,7 +32,7 @@ Speakhold is a push-to-talk voice typing tool for Mac, built as a free replaceme
 - **Hands-free when you need it.** Tap Space while holding the chord and let go; Speakhold keeps listening until you press the chord again.
 
 <p align="center">
-  <img src="docs/states.png" width="600" alt="The Speakhold bar in each state: idle tab, listening with live words, transcribing, polishing, done, error">
+  <img src="docs/states.png" width="600" alt="The Speakhold bar in each state: idle tab, listening, transcribing, polishing, done, error">
 </p>
 
 - **Polish on your Mac.** On macOS 26 with Apple Intelligence, Speakhold strips "um"s, fixes punctuation and spells the names in your personal dictionary correctly, on-device, no key, nothing sent anywhere. Prefer Claude? Add your API key and pick it under Cleanup. Either way, spoken commands ("new paragraph", "full stop", "comma", "question mark") always work, text replacements (`my email -> you@…`) run last, and the raw transcript is pasted if a model fails or wanders.
@@ -75,7 +75,7 @@ open ~/Applications/Speakhold.app
 
 | Tab | What you can change |
 |---|---|
-| **General** | Hotkey: click Record and press the keys you want (any mix of left/right ⌃ ⌥ ⇧ ⌘, fn, plus an optional F-key), hold vs toggle, microphone picker with a 3 s test, Whisper model (Large v3 Turbo, Large v3, Distil, Base), language, bar position (right edge / bottom right / bottom centre), idle tab on/off, live words on/off, sounds, launch at login |
+| **General** | Hotkey: click Record and press the keys you want (any mix of left/right ⌃ ⌥ ⇧ ⌘, fn, plus an optional F-key), hold vs toggle, microphone picker with a 3 s test, Whisper model (Large v3 Turbo, Large v3, Distil, Base), language, bar position (right edge / bottom right / bottom centre), idle tab on/off, sounds, launch at login |
 | **Cleanup** | Polish engine: Apple Intelligence (on-device, default on macOS 26) / Claude / off; the Claude key and model (also used for meeting notes; or `ANTHROPIC_API_KEY`); personal dictionary; text replacements; style notes |
 | **Meetings** | Offer to record when an app starts a call, title and invitees from Calendar, transcription engine (Whisper / Parakeet), tell the far-side voices apart, which engine writes the notes (Claude with a key, otherwise on-device), follow-up email draft, where the files save |
 | **Permissions** | Microphone and Accessibility status with one-click prompts |

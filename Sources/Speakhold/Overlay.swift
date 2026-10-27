@@ -121,6 +121,16 @@ struct OverlayView: View {
             .frame(maxWidth: 240, alignment: .trailing)
     }
 
+    /// The dictation states share one frame so the pill opens from the tab to a fixed size and stays there; only
+    /// the states that carry a sentence (error, meeting, offer) size to their text.
+    private var fixedWidth: CGFloat? {
+        switch model.phase {
+        case .listening, .transcribing, .cleaning: return 104
+        case .done(let text): return text.isEmpty ? 104 : nil
+        default: return nil
+        }
+    }
+
     /// Idle glyph: three still bars, mint once the model is loaded.
     private var glyph: some View {
         HStack(alignment: .center, spacing: 2.5) {
@@ -140,13 +150,10 @@ struct OverlayView: View {
                     Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold)).foregroundStyle(Ink.mint)
                 }
                 Waveform(levels: Array(model.levels.suffix(22))).frame(height: 14)
-                if !model.liveText.isEmpty { words(model.liveText) }   // only with "Show words in the pill" on
             case .transcribing:
                 ThinkingDots(color: Ink.mint)
-                if !model.liveText.isEmpty { words(model.liveText + "…") }
             case .cleaning:
                 ThinkingDots(color: Ink.amber)
-                if !model.liveText.isEmpty { words(model.liveText + "…") }
             case .done(let text):   // dictation passes "" : the tick is the whole message, the words are already in the app
                 Image(systemName: "checkmark").font(.system(size: 12, weight: .bold)).foregroundStyle(Ink.mint)
                 if !text.isEmpty { words(text) }
@@ -168,6 +175,7 @@ struct OverlayView: View {
         }
         .id(phaseKey)
         .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: unitAnchor)))
+        .frame(width: fixedWidth, height: fixedWidth == nil ? nil : 16)   // one size for bars, dots and tick: the pill never grows
         .padding(.horizontal, isIdle ? 8 : 11)
         .padding(.vertical, isIdle ? 8 : 7)
         .background(pillBackground)

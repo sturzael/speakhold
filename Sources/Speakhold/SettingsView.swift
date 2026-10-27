@@ -384,9 +384,6 @@ struct SettingsView: View {
                 InkRow(label: "Keep a small tab on screen while idle") {
                     Toggle("", isOn: $settings.showIdlePill).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
-                InkRow(label: "Show words in the pill while you speak (makes it wide)") {
-                    Toggle("", isOn: $settings.livePreview).toggleStyle(InkToggleStyle()).labelsHidden()
-                }
             }
 
             InkCard(title: "Hotkey", note: "Click Record, hold the keys you want (e.g. Control + Option) and let go. Left and right keys are told apart. Add an F-key by pressing it while the modifiers are held. While dictating, tap Space to lock hands-free: let go, keep talking, press the chord again to finish. Esc cancels.") {
