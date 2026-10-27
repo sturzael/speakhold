@@ -334,11 +334,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         meetingJobs[id] = (title, stage, fraction)
         if meetingJobs.count == 1 { meetingState.status = stage; meetingState.progress = fraction }
         refreshJobItem()
+        // The pill rests on the job while it runs (a dictation still takes it over, and gets it back after).
+        overlay.jobLabel = "Notes \(Int(fraction * 100))%"
+        if case .idle = overlay.model.phase { overlay.hide() }
+        if case .hidden = overlay.model.phase { overlay.hide() }
     }
 
     private func finishJob(_ id: UUID, url: URL) {
         meetingJobs[id] = nil
-        if meetingJobs.isEmpty { meetingState.status = ""; meetingState.progress = nil }
+        if meetingJobs.isEmpty { meetingState.status = ""; meetingState.progress = nil; overlay.jobLabel = nil }
         refreshJobItem()
         History.shared.add("Meeting notes: \(url.lastPathComponent)", app: "Speakhold")
         if meeting == nil, !isRecording, !busy {
@@ -351,7 +355,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     private func failJob(_ id: UUID, title: String, error: Error, audio: URL?) {
         meetingJobs[id] = nil
-        if meetingJobs.isEmpty { meetingState.status = ""; meetingState.progress = nil }
+        if meetingJobs.isEmpty { meetingState.status = ""; meetingState.progress = nil; overlay.jobLabel = nil }
         refreshJobItem()
         let kept = audio.map { " The recording is kept at \($0.path)." } ?? ""
         notify(title: "Meeting notes failed", body: error.localizedDescription + kept, path: audio?.path)
