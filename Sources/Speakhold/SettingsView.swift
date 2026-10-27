@@ -589,7 +589,17 @@ struct SettingsView: View {
                 InkRow(label: "Written by", hint: notesEngineHint, divider: false) {
                     StatusChip(text: notesEngineLabel, color: notesEngineColor)
                 }
-                if settings.anthropicKey.isEmpty {
+                if ClaudeCode.available {
+                    InkRow(label: "Use Claude Code on this Mac", hint: "Claude Code is installed. Notes go through it under your own Claude login and plan, no API key and no API charges. Only the transcript text is sent, never audio.") {
+                        Toggle("", isOn: $settings.notesViaClaudeCode).toggleStyle(InkToggleStyle()).labelsHidden()
+                    }
+                    if settings.notesViaClaudeCode {
+                        InkRow(label: "Model", hint: "An alias (sonnet, opus, haiku) or a full model name.") {
+                            InkField(placeholder: "sonnet", text: $settings.claudeCodeModel, width: 200)
+                        }
+                    }
+                }
+                if settings.anthropicKey.isEmpty, !(ClaudeCode.available && settings.notesViaClaudeCode) {
                     InkRow(label: "Anthropic API key", hint: "Same key as Cleanup. Only the transcript text is sent, never audio.") {
                         InkField(placeholder: "sk-ant-…", text: $settings.anthropicKey, secure: true, width: 260)
                     }
@@ -623,15 +633,18 @@ struct SettingsView: View {
         }
     }
 
+    private var usingClaudeCode: Bool { ClaudeCode.available && settings.notesViaClaudeCode }
     private var notesEngineLabel: String {
+        if usingClaudeCode { return "Claude Code · \(settings.claudeCodeModel.isEmpty ? "sonnet" : settings.claudeCodeModel)" }
         if !settings.anthropicKey.isEmpty { return "Claude · \(settings.cleanupModel.isEmpty ? "claude-haiku-5-5" : settings.cleanupModel)" }
         return Polish.appleAvailable ? "Apple Intelligence, on-device" : "No notes engine"
     }
     private var notesEngineColor: Color {
-        if !settings.anthropicKey.isEmpty { return Ink.mint }
+        if usingClaudeCode || !settings.anthropicKey.isEmpty { return Ink.mint }
         return Polish.appleAvailable ? Ink.amber : Ink.red
     }
     private var notesEngineHint: String {
+        if usingClaudeCode { return "Reads the whole transcript through your Claude Code login; usage counts against your plan, not an API bill. Takes a minute or two for a long call." }
         if !settings.anthropicKey.isEmpty { return "Reads the whole transcript. Recommended for anything longer than a few minutes." }
         if Polish.appleAvailable { return "Fine for a short call. A long meeting goes through the small on-device model in parts and it misreads cross-talk; add a Claude key for notes you can trust. You can rewrite a saved file later: Speakhold --notes-from-transcript <file>." }
         return "Add a Claude key, or turn on Apple Intelligence (macOS 26, Apple silicon). Without either, the file has the transcript only."

@@ -122,6 +122,9 @@ final class Settings: ObservableObject {
     /// One per line: `spoken -> written`. Applied after the model pass.
     @Published var replacements: String { didSet { d.set(replacements, forKey: "replacements") } }
     @Published var cleanupModel: String { didSet { d.set(cleanupModel, forKey: "cleanupModel") } }
+    /// Meeting notes through Claude Code on this Mac (the user's own login) when it is installed.
+    @Published var notesViaClaudeCode: Bool { didSet { d.set(notesViaClaudeCode, forKey: "notesViaClaudeCode") } }
+    @Published var claudeCodeModel: String { didSet { d.set(claudeCodeModel, forKey: "claudeCodeModel") } }
     @Published var anthropicKey: String { didSet { d.set(anthropicKey, forKey: "anthropicKey") } }
     @Published var dictionary: String { didSet { d.set(dictionary, forKey: "dictionary") } }
     @Published var styleNotes: String { didSet { d.set(styleNotes, forKey: "styleNotes") } }
@@ -159,6 +162,8 @@ final class Settings: ObservableObject {
         }
         replacements = d.string(forKey: "replacements") ?? ""
         cleanupModel = d.string(forKey: "cleanupModel") ?? "claude-haiku-5-5"
+        notesViaClaudeCode = d.object(forKey: "notesViaClaudeCode") as? Bool ?? true
+        claudeCodeModel = d.string(forKey: "claudeCodeModel") ?? "sonnet"
         anthropicKey = d.string(forKey: "anthropicKey") ?? Settings.keyFromEnvironment()
         dictionary = d.string(forKey: "dictionary") ?? ""
         styleNotes = d.string(forKey: "styleNotes") ?? ""

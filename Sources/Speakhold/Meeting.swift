@@ -265,12 +265,16 @@ enum MeetingNotes {
         if !marked.isEmpty { user += "Moments the speaker flagged as important:\n\n\(marked)\n\n" }
         user += "Transcript:\n\n" + transcript
         var failure = ""
+        if s.notesViaClaudeCode, ClaudeCode.available {
+            if let out = await ClaudeCode(model: s.claudeCodeModel).complete(system: brief, user: user) { return out }
+            failure = "Claude Code did not answer (is it logged in? run `claude` once in a terminal). "
+        }
         if !s.anthropicKey.isEmpty {
             if let out = await ClaudeClient(apiKey: s.anthropicKey, model: s.cleanupModel)
                 .complete(system: brief, user: user, maxTokens: 2500, effort: "medium", timeout: 120) {
                 return out
             }
-            failure = "Claude did not answer (check the key and the connection). "
+            failure += "Claude did not answer (check the key and the connection). "
         }
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *), Polish.appleAvailable {
@@ -282,7 +286,7 @@ enum MeetingNotes {
         #else
         failure += "Apple Intelligence is not available on this Mac."
         #endif
-        return "_No notes were written. \(failure) Set a Claude key under Settings → Cleanup, or run `Speakhold --notes-from-transcript <this file>` later._"
+        return "_No notes were written. \(failure) Install Claude Code or set a Claude key (Settings → Meetings → Notes), then run `Speakhold --notes-from-transcript <this file>`._"
     }
 
     #if canImport(FoundationModels)
@@ -335,7 +339,7 @@ enum MeetingNotes {
         var material = plain
         var pass = 0
         var stalled = false
-        let caveat = "_Written on-device in parts, so the small model may misread cross-talk; set a Claude key under Settings → Cleanup for better notes on long meetings._\n\n"
+        let caveat = "_Written on-device in parts, so the small model may misread cross-talk; install Claude Code or set a Claude key (Settings → Meetings → Notes) for better notes on long meetings._\n\n"
         while true {
             if wordCount(material) <= 380 || pass >= 4 || stalled {
                 if stalled || pass >= 4 { material = material.split(whereSeparator: \.isWhitespace).prefix(380).joined(separator: " ") }
@@ -384,6 +388,7 @@ enum MeetingNotes {
 
     static func followUp(notes: String, me: String, settings s: Settings) async -> String {
         let user = "Sender: \(me)\n\nNotes:\n\n\(notes)"
+        if s.notesViaClaudeCode, ClaudeCode.available, let out = await ClaudeCode(model: s.claudeCodeModel).complete(system: followUpBrief, user: user, timeout: 120) { return out }
         if !s.anthropicKey.isEmpty, let out = await ClaudeClient(apiKey: s.anthropicKey, model: s.cleanupModel).complete(system: followUpBrief, user: user, maxTokens: 600, effort: "low", timeout: 60) {
             return out
         }

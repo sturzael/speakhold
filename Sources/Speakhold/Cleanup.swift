@@ -193,6 +193,56 @@ struct AppleCleanup {
 }
 #endif
 
+/// Claude Code installed on this Mac, run in print mode (`claude -p`): the user's own Claude login and plan, no
+/// API key. The brief goes in as the system prompt, the transcript on stdin, the notes come back on stdout.
+/// Tools are off and nothing is persisted, so it is one model call made under the user's account.
+struct ClaudeCode {
+    static let candidates = ["~/.local/bin/claude", "/usr/local/bin/claude", "/opt/homebrew/bin/claude", "~/.claude/local/claude", "~/.npm-global/bin/claude"]
+    static var path: String? {
+        candidates.map { ($0 as NSString).expandingTildeInPath }.first { FileManager.default.isExecutableFile(atPath: $0) }
+    }
+    static var available: Bool { path != nil }
+
+    let model: String
+
+    func complete(system: String, user: String, timeout: TimeInterval = 300) async -> String? {
+        guard let exe = Self.path, !user.isEmpty else { return nil }
+        return await withCheckedContinuation { cont in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let p = Process()
+                p.executableURL = URL(fileURLWithPath: exe)
+                p.arguments = ["-p", "--output-format", "text", "--no-session-persistence", "--tools", "",
+                               "--model", model, "--system-prompt", system]
+                var env = ProcessInfo.processInfo.environment
+                let home = NSHomeDirectory()
+                env["PATH"] = "\(home)/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
+                env["HOME"] = home
+                env.removeValue(forKey: "CLAUDECODE")
+                env.removeValue(forKey: "CLAUDE_CODE_ENTRYPOINT")
+                p.environment = env
+                p.currentDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory())
+                let inPipe = Pipe(), outPipe = Pipe(), errPipe = Pipe()
+                p.standardInput = inPipe; p.standardOutput = outPipe; p.standardError = errPipe
+                do { try p.run() } catch { NSLog("Speakhold: could not run Claude Code: %@", error.localizedDescription); cont.resume(returning: nil); return }
+                DispatchQueue.global().async {
+                    inPipe.fileHandleForWriting.write(user.data(using: .utf8) ?? Data())
+                    try? inPipe.fileHandleForWriting.close()
+                }
+                DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { if p.isRunning { p.terminate() } }
+                let out = outPipe.fileHandleForReading.readDataToEndOfFile()
+                let err = errPipe.fileHandleForReading.readDataToEndOfFile()
+                p.waitUntilExit()
+                let text = String(data: out, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                if p.terminationStatus != 0 || text.isEmpty || text.hasPrefix("Not logged in") {
+                    NSLog("Speakhold: Claude Code exit %d: %@ %@", p.terminationStatus, text.prefix(200).description, String(data: err, encoding: .utf8)?.prefix(200).description ?? "")
+                    cont.resume(returning: nil); return
+                }
+                cont.resume(returning: text)
+            }
+        }
+    }
+}
+
 /// Raw HTTP to the Messages API with the user's own key; there is no official Swift SDK.
 struct ClaudeClient {
     let apiKey: String
