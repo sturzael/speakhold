@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon.png">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Speakhold","operatingSystem":"macOS 14+","applicationCategory":"UtilitiesApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","downloadUrl":"https://github.com/sturzael/speakhold/releases/latest","softwareVersion":"0.1.2","description":"Free, open-source push-to-talk dictation and on-device meeting notes for macOS."}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Speakhold","operatingSystem":"macOS 14+","applicationCategory":"UtilitiesApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","downloadUrl":"https://github.com/sturzael/speakhold/releases/latest","softwareVersion":"0.2.0","description":"Free, open-source push-to-talk dictation and on-device meeting notes for macOS."}
 </script>
 <style>
   :root{--bg:#12141f;--panel:#1d202f;--text:#e8ebf0;--muted:#8e96a8;--accent:#9fe7af;--amber:#e8b36a;--line:rgba(255,255,255,.09)}
@@ -48,10 +48,16 @@
   .note b{color:var(--accent)}
   .states{display:block;width:100%;max-width:640px;margin:8px auto 0;border-radius:14px;border:1px solid var(--line)}
   @media (max-width:600px){h1{font-size:34px}.tag{font-size:17px}}
+  nav.site{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:14px;margin:0 0 28px}
+  nav.site a{color:var(--muted);text-decoration:none}nav.site a:hover{color:var(--text)}
+  .lede{font-size:19px;color:var(--muted);max-width:640px;margin:8px 0 24px}
+  .faq h3{font-size:17px;margin:22px 0 6px}
+  .faq p{margin:0;color:var(--muted)}
 </style>
 </head>
 <body>
 <main>
+  <nav class="site"><a href="">Speakhold</a><a href="meeting-notes.html">Meeting notes</a><a href="vs/willow-voice.html">vs Willow</a><a href="vs/wispr-flow.html">vs Wispr Flow</a><a href="vs/superwhisper.html">vs Superwhisper</a><a href="vs/fireflies.html">vs Fireflies</a><a href="https://github.com/sturzael/speakhold">GitHub</a></nav>
   <header>
     <img src="icon.png" alt="Speakhold icon">
     <h1>Speakhold</h1>
@@ -67,31 +73,32 @@
 
   <pre><code>brew install --cask sturzael/tap/speakhold</code></pre>
 
-  <p class="note"><b>0.2 is on <code>main</code> now, release this week:</b> polish on-device with Apple Intelligence, Undo on the bar, hands-free lock, text replacements, a Dock icon, scripting, and meeting recording with notes. Build it with <code>./build.sh</code> today, or wait for the download.</p>
+  <p class="note"><b>0.2 is out:</b> meeting recording with notes written in the background, polish on-device with Apple Intelligence, Undo on the bar, hands-free lock, text replacements, a Dock icon and scripting. <a href="https://github.com/sturzael/speakhold/blob/main/CHANGELOG.md">What changed</a>.</p>
 
   <h2>Why people switch from Willow, Wispr Flow and Superwhisper</h2>
   <div class="grid">
-    <div class="card"><h3>Words as you speak</h3><p>A small tab docked to the screen edge opens into a bar that shows the transcript live while you hold the key. Let go and it lands at the cursor.</p></div>
+    <div class="card"><h3>Hold, talk, let go</h3><p>A small tab docked to the screen edge opens into a short bar of glowing waveform while you hold the key. Let go and the sentence lands at the cursor.</p></div>
     <div class="card"><h3>100% on-device</h3><p>Speech-to-text runs with WhisperKit on the Apple Neural Engine. Works offline. Audio never leaves the machine.</p></div>
     <div class="card"><h3>Any hotkey chord</h3><p>Left and right modifiers are different keys. Default is left ⌃ + left ⌥, which collides with nothing. Hold to talk or press to toggle.</p></div>
     <div class="card"><h3>Pastes anywhere</h3><p>Slack, Gmail, Xcode, Terminal, Notes, the browser. Wherever the cursor is. Your clipboard is restored afterwards.</p></div>
     <div class="card"><h3>Native and tiny</h3><p>One Swift binary, a couple of megabytes. No Electron, no Tauri, no background helpers. Lives in the menu bar; the Dock icon is optional.</p></div>
     <div class="card"><h3>Polish on your Mac</h3><p>On macOS 26, Apple Intelligence removes fillers, fixes punctuation and spells names from your dictionary, on-device, no key. Prefer Claude? Add your own key. Spoken commands and text replacements always work.</p></div>
     <div class="card"><h3>Undo, lock, retry</h3><p>Undo sits on the bar for three seconds after a paste. Tap Space while holding to go hands-free. Try again re-runs a failed recording.</p></div>
-    <div class="card"><h3>Takes the minutes</h3><p>Record both sides of a Zoom, Meet or Teams call, no bot and no virtual driver. Stop, carry on working; the notes are written in the background and a notification opens the file. Audio never leaves the Mac; add a Claude key for the notes on long calls.</p></div>
+    <div class="card"><h3>Takes the minutes</h3><p>Record both sides of a Zoom, Meet or Teams call, no bot and no virtual driver. It stops itself when the call ends; the notes are written in the background and a notification opens the file. Audio never leaves the Mac. <a href="meeting-notes.html">How meetings work</a>.</p></div>
     <div class="card"><h3>Scriptable</h3><p><code>speakhold://toggle</code> or <code>Speakhold --toggle</code> drives the running app from SketchyBar, Raycast or a Shortcut.</p></div>
     <div class="card"><h3>Open source</h3><p>MIT licensed. Read every line that touches your microphone. Issues and pull requests welcome.</p></div>
   </div>
 
   <h2>The bar</h2>
-  <p>Idle, it is a lozenge on the right edge of the screen. Hold the chord and it grows into a bar with a live waveform and the words so far; the newest words stay in view. Dots while it finishes, amber while Claude polishes, a tick when it has pasted. Position and the idle tab are settings.</p>
+  <p>Idle, it is a lozenge on the right edge of the screen. Hold the chord and it opens into a short bar of waveform that moves with your voice, and stays that size. Dots while it finishes, amber while the polish runs, a tick when it has pasted. Position and the idle tab are settings.</p>
   <img class="states" src="states.png" alt="The Speakhold bar in each state: idle tab, listening, transcribing, polishing, done, error">
 
   <h2>Meetings</h2>
-  <p>Choose <em>Record meeting</em>, or let Speakhold offer when it notices an app on a call. Your microphone and what the Mac is playing are recorded as two streams, so you and the other side are labelled without a bot joining the meeting. Type your own notes while it runs; tap the chord once to mark a moment; ask for the last two minutes if you drifted. Stop, and the rest happens in the background while you work: the menu bar shows how far along it is, dictation keeps working, and a notification opens the file when it lands. It transcribes on the Neural Engine, tells the far-side voices apart, names the meeting from your calendar, and writes Summary, Decisions, Action items and Open questions into one markdown file, with the full transcript underneath, in <code>~/Documents/Speakhold Meetings</code> or a folder you choose. The audio is deleted.</p>
+  <p>Choose <em>Record meeting</em>, or let Speakhold offer when it notices an app on a call. Your microphone and what the Mac is playing are recorded as two streams, so you and the other side are labelled without a bot joining the meeting. Type your own notes while it runs; tap the chord once to mark a moment; ask for the last two minutes if you drifted. When the call app lets go of the microphone it counts down and stops on its own, or press stop. The rest happens in the background while you work: the menu bar shows how far along it is, dictation keeps working, and a notification opens the file when it lands. It transcribes on the Neural Engine, tells the far-side voices apart, names the meeting from your calendar, and writes Summary, Decisions, Action items and Open questions into one markdown file, with the full transcript underneath, in <code>~/Documents/Speakhold Meetings</code> or a folder you choose. The audio is deleted.</p>
   <p><b>Which model writes the notes.</b> If Claude Code is on your Mac, the notes go through it under your own Claude plan, no API key and no API bill. Otherwise add your own Claude key and it reads the whole transcript; either is the one to use for a real meeting. Without a key, Apple Intelligence writes the notes on-device in parts, which is fine for a short call and weak on a long one, and the file says so. Either way the audio stays on the Mac; with Claude, the transcript text is sent with your key, nothing else.</p>
 
   <h2>Compared</h2>
+  <p class="small" style="text-align:left">Longer, honest comparisons: <a href="vs/willow-voice.html">Willow Voice</a> · <a href="vs/wispr-flow.html">Wispr Flow</a> · <a href="vs/superwhisper.html">Superwhisper</a> · <a href="vs/fireflies.html">Fireflies</a>.</p>
   <table>
     <tr><th></th><th>Speakhold</th><th>Willow Voice</th><th>Wispr Flow</th><th>Superwhisper</th></tr>
     <tr><td>Price</td><td>Free</td><td>US$12–15/mo</td><td>US$12–15/mo</td><td>US$8.49/mo</td></tr>
@@ -107,7 +114,7 @@
   <h2>How it works</h2>
   <p>Speakhold captures your microphone only while the chord is held, converts the audio to 16 kHz mono, runs it through Whisper Large v3 Turbo in-process, and types the result into the frontmost app with a synthetic ⌘V. The model (about 630 MB) downloads once on first launch. Polish runs on-device through Apple Intelligence. The only network request the app can make is the Claude engine, and only if you choose it and provide a key. Meetings add a Core Audio process tap for what the Mac is playing, behind macOS's "System Audio Recording Only" permission; the audio is transcribed locally and deleted.</p>
 
-  <footer>Built on <a href="https://github.com/argmaxinc/WhisperKit">WhisperKit</a>. Made in Wellington, New Zealand by <a href="https://wildinteractive.co.nz">Wild Interactive</a>.</footer>
+  <footer>Built on <a href="https://github.com/argmaxinc/WhisperKit">WhisperKit</a>. Made in Wellington, New Zealand by <a href="https://wildinteractive.co.nz">Wild Interactive</a>. <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="https://github.com/sturzael/speakhold/blob/main/CHANGELOG.md">Changelog</a></footer>
 </main>
 </body>
 </html>

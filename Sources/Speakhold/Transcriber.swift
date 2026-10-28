@@ -123,7 +123,7 @@ actor Transcriber {
                 for seg in r.segments {
                     let text = Transcriber.tidy(seg.text)
                     guard !text.isEmpty, seg.noSpeechProb < 0.8 else { continue }
-                    guard !Transcriber.looksHallucinated(text, noSpeech: seg.noSpeechProb, logProb: seg.avgLogprob) else { continue }
+                    guard !Transcriber.looksHallucinated(text, noSpeech: seg.noSpeechProb, logProb: seg.avgLogprob, compression: seg.compressionRatio) else { continue }
                     // The same short line twice in a row inside one region is the decoder looping, not the speaker.
                     if let last = out.last, last.text == text, text.split(separator: " ").count < 6, offset + Double(seg.start) - last.end < 2 { continue }
                     out.append(Segment(start: offset + Double(seg.start), end: offset + Double(seg.end), text: text))
@@ -141,8 +141,12 @@ actor Transcriber {
         "thanks for listening", "thank you for listening", "see you next time", "see you in the next video",
         "subtitles by the amara org community", "the end", "you", "bye", "okay", "so", "oh", "yeah", "yes", "hmm", "mm",
     ]
-    static func looksHallucinated(_ text: String, noSpeech: Float, logProb: Float) -> Bool {
-        let norm = text.lowercased().unicodeScalars.map { CharacterSet.letters.contains($0) ? Character($0) : " " }
+    static func looksHallucinated(_ text: String, noSpeech: Float, logProb: Float, compression: Float = 1) -> Bool {
+        // Whisper's own thresholds: a segment the decoder was this unsure of, or this repetitive, is noise.
+        if logProb < -1.0 || compression > 2.4 || (noSpeech > 0.6 && logProb < -0.5) { return true }
+        // Sound-effect markers ("*sing*", "[Music]") and lines with no letters at all.
+        let bare = text.replacingOccurrences(of: "\\*[^*]*\\*|\\[[^\\]]*\\]|\\([^)]*\\)", with: "", options: .regularExpression)
+        let norm = bare.lowercased().unicodeScalars.map { CharacterSet.letters.contains($0) ? Character($0) : " " }
             .reduce(into: "") { $0.append($1) }
             .split(separator: " ").joined(separator: " ")
         guard !norm.isEmpty else { return true }

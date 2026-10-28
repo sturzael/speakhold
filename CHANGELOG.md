@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-28
 
 - **The recording stops itself when the call ends.** Speakhold remembers which app was on the call when you pressed record; once that app has let go of the microphone for ten seconds, the pill counts down 45 seconds and stops, with a *Keep going* chip if the call is only reconnecting. Recordings started with no call app running (a meeting in the room) are left alone.
 - **No more "Thank you. Thank you." over silence.** Whisper's stock lines over quiet audio are dropped when the decoder was unsure of them or when they are nothing but the phrase repeated, and a short line decoded twice in a row is kept once. Eight minutes of an empty room produced a page of them on 28 Oct.
