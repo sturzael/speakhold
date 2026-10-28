@@ -282,3 +282,9 @@ td:first-child{color:var(--muted-fg)}
 .page .faq > *{animation:none;opacity:1;transform:none}
 .page .no{color:var(--muted-fg,#6d6a5f);font-weight:500}
 .page .btn.ghost{border:1px solid var(--border,#e5e2d8);background:var(--card,#fff);color:var(--fg,#2b2d35)}
+/* Star chip in the nav */
+.nav a.stars{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border,#e5e2d8);background:var(--card,#fff);border-radius:999px;padding:7px 12px;font-weight:600;font-size:13.5px;color:var(--fg,#2b2d35);text-decoration:none;margin-right:10px}
+.nav a.stars svg{width:15px;height:15px;color:#d9a21b}
+.nav a.stars b{font-weight:700;font-variant-numeric:tabular-nums}
+.nav a.stars:hover{border-color:var(--primary,#3b8a5e)}
+@media (max-width:720px){.nav a.stars span{display:none}}
