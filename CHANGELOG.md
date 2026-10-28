@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **A steadier, narrower pill.** The same small frame for listening, thinking, the tick, the meeting clock and the notes job, so the pill keeps one height and one width across states; fewer bars while listening so it reaches out less. The meeting clock is just the time, the notes job just the percentage.
+
 ## 0.2.1 — 2026-10-28
 
 - **Silence filter tuned.** 0.2.0 applied Whisper's confidence thresholds to every line and lost some real but badly heard speech. They now apply to short lines only, where hallucinations live; a looping decoder is still dropped at any length. Measured on a 29-minute call: 95% of the words kept over the real part, half the junk after it gone.

@@ -267,12 +267,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             meetingState.onStop = { [weak self] in self?.toggleMeeting() }
             meetingState.onMark = { [weak self] in self?.markMoment() }
             meetingState.onCatchUp = { [weak self] in self?.catchMeUp() }
-            overlay.meetingLabel = "Recording 0:00"
-            overlay.show(.meeting("Recording 0:00"))
+            overlay.meetingLabel = "0:00"
+            overlay.show(.meeting("0:00"))
             if Settings.shared.playSounds { NSSound(named: "Tink")?.play() }
             meetingTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
                 guard let self, let s = self.meeting as? MeetingSession else { return }
-                self.overlay.meetingLabel = "Recording " + s.elapsedLabel
+                self.overlay.meetingLabel = s.elapsedLabel
                 self.meetingState.elapsedLabel = s.elapsedLabel
             }
             openMeetingWindow()
@@ -340,7 +340,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         if meetingJobs.count == 1 { meetingState.status = stage; meetingState.progress = fraction }
         refreshJobItem()
         // The pill rests on the job while it runs (a dictation still takes it over, and gets it back after).
-        overlay.jobLabel = "Notes \(Int(fraction * 100))%"
+        overlay.jobLabel = "\(Int(fraction * 100))%"
         if case .idle = overlay.model.phase { overlay.hide() }
         if case .hidden = overlay.model.phase { overlay.hide() }
     }
@@ -466,7 +466,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             toggleMeeting()
             return
         }
-        overlay.show(.ending("Call ended. Writing the notes in \(left) s"))
+        overlay.show(.ending("Ended · notes in \(left) s"))
     }
 
     @objc private func openSettings() {

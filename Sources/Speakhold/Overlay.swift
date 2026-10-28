@@ -126,8 +126,8 @@ struct OverlayView: View {
     /// the states that carry a sentence (error, meeting, offer) size to their text.
     private var fixedWidth: CGFloat? {
         switch model.phase {
-        case .listening, .transcribing, .cleaning: return 104
-        case .done(let text): return text.isEmpty ? 104 : nil
+        case .listening, .transcribing, .cleaning, .meeting, .job: return 88
+        case .done(let text): return text.isEmpty ? 88 : nil
         default: return nil
         }
     }
@@ -150,7 +150,7 @@ struct OverlayView: View {
                 if model.locked {
                     Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold)).foregroundStyle(Ink.mint)
                 }
-                Waveform(levels: Array(model.levels.suffix(22))).frame(height: 14)
+                Waveform(levels: Array(model.levels.suffix(16))).frame(height: 14)
             case .transcribing:
                 ThinkingDots(color: Ink.mint)
             case .cleaning:
@@ -171,7 +171,7 @@ struct OverlayView: View {
                 Text(label).font(.system(size: 13, weight: .medium)).monospacedDigit().foregroundStyle(Ink.text)
             case .ending(let label):   // the call app let go of the microphone: stopping unless told otherwise
                 RecordingDot()
-                Text(label).font(.system(size: 13)).monospacedDigit().foregroundStyle(Ink.text)
+                Text(label).font(.system(size: 12.5)).monospacedDigit().foregroundStyle(Ink.text)
                 chip("Keep going") { model.onKeep?() }
             case .offer(let app):
                 RecordingDot()
