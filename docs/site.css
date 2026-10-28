@@ -92,7 +92,10 @@ code{font-family:var(--mono);font-size:.92em}
 .scene .legend span b{color:var(--ink-fg);font-weight:600}
 @media (max-width:860px){.scene .stage{grid-template-columns:1fr;padding:24px;gap:20px}.scene .gif{justify-self:center}.scene .doc{min-height:0}}
 @media (max-width:400px){.scene .gif,.scene .gif img{width:100%;height:auto}}
-.install{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:28px auto 0}
+.install{display:flex;flex-direction:column;align-items:center;gap:10px;margin:28px auto 0;max-width:640px;text-align:center}
+.install .how{margin:0;font-size:14.5px;line-height:1.55;color:var(--muted-fg)}
+.install .how b{color:var(--fg)}
+.install .mono code{font:inherit;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:3px 8px}
 .install pre{margin:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:11px 16px;font:14px/1.4 var(--mono);overflow:auto;max-width:100%}
 .hero-end{padding-bottom:96px}
 @media (max-width:800px){.hero-end{padding-bottom:64px}}

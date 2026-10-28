@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sturzael/speakhold/releases/latest"><img src="https://img.shields.io/github/v/release/sturzael/speakhold?label=download&color=5865F2" alt="Download"></a>
+  <a href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip"><img src="https://img.shields.io/github/v/release/sturzael/speakhold?label=download&color=5865F2" alt="Download"></a>
   <a href="https://github.com/sturzael/speakhold/actions"><img src="https://img.shields.io/github/actions/workflow/status/sturzael/speakhold/build.yml?label=build" alt="Build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B%20Apple%20Silicon-black" alt="macOS 14+">
@@ -64,8 +64,8 @@ If it replaces a subscription for you, a star on the repo helps the next person 
 
 ## Install
 
-**Download:** grab `Speakhold.app.zip` from the [latest release](https://github.com/sturzael/speakhold/releases/latest), unzip, drag to Applications.
-The app is not notarized yet, so the first launch needs a right-click → **Open**, or:
+**Download:** [Speakhold.app.zip](https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip) (12 MB), unzip, drag to Applications, open.
+The app is not notarized yet, so if macOS says it cannot check it: on macOS 14 right-click → **Open**; on macOS 15 and later, System Settings → Privacy & Security → **Open Anyway**. Or clear the flag:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/Speakhold.app
