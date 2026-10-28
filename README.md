@@ -5,8 +5,10 @@
 <h1 align="center">Speakhold</h1>
 
 <p align="center">
-  <strong>Hold a key, talk, let go. Your words land wherever your cursor is.</strong><br>
-  Free, open-source dictation and meeting notes for macOS, in native Swift. Whisper runs on your Mac; your audio never leaves it. Add a Claude key only if you want it writing the notes.
+  <strong>Two things, one small Mac app.</strong><br>
+  <strong>Dictation:</strong> hold a key, talk, let go, and the words land wherever your cursor is.<br>
+  <strong>Meeting notes:</strong> press record on a call, and the notes are written when it ends.<br>
+  Free, open source, native Swift. Whisper runs on your Mac and the audio never leaves it.
 </p>
 
 <p align="center">
@@ -18,17 +20,26 @@
 </p>
 
 <p align="center">
-  <img src="docs/demo.gif" width="520" alt="Speakhold demo: hold the hotkey, the bar shows your words as you speak, release and the text is pasted">
+  <img src="docs/demo.gif" width="300" alt="Speakhold demo: hold the hotkey, the bar moves with your voice, release and the sentence is pasted">
 </p>
 
-Speakhold is a push-to-talk voice typing tool for Mac, built as a free replacement for **Willow Voice**, **Wispr Flow**, **Superwhisper** and **MacWhisper**-style dictation. It is a single native Swift binary, a couple of megabytes, no Electron, no account, no subscription.
+## What it does
 
-## Why Speakhold
+| | Dictation | Meeting notes |
+|---|---|---|
+| **You** | Hold a chord (default left ⌃ + left ⌥), speak, let go | Choose *Record meeting*, or tap *Record* when the pill notices a call, then have the call |
+| **It** | Pastes the sentence into whatever app is in front, cleaned up | Records your mic and the Mac's audio, stops itself when the call ends, writes Summary / Decisions / Action items / Open questions plus the full transcript to one markdown file |
+| **Where it runs** | Whisper on the Neural Engine, on-device | Whisper (or Parakeet) on-device; the notes by Claude Code on your Mac, your own Claude key, or Apple Intelligence |
+| **Replaces** | Willow Voice, Wispr Flow, Superwhisper, MacWhisper | Fireflies, Otter and the other meeting bots |
+
+One native Swift binary, a 12 MB download, no Electron, no account, no subscription. MIT.
+
+## Dictation
 
 - **100 % on-device.** Speech-to-text runs with [WhisperKit](https://github.com/argmaxinc/WhisperKit) on the Apple Neural Engine. Works offline. Your audio never touches a server.
 - **Any hotkey chord, left and right aware.** Hold *left ⌃ + left ⌥* (default), *right ⌥* alone, *fn*, or add an F-key. Hold-to-talk or press-to-toggle.
 - **Pastes anywhere.** Slack, Gmail, Xcode, Terminal, Notes, your browser: wherever the cursor is.
-- **Words as you speak.** A small tab docked to the right edge of the screen opens into a bar that shows the transcript live while you hold the key, Willow-style. Release and it lands at the cursor. Esc cancels. **Undo** sits on the bar for three seconds after a paste; **Try again** re-runs the last recording if it failed.
+- **A bar that moves with your voice.** A small tab docked to the right edge of the screen opens into a short bar of glowing waveform while you hold the key, then dots while it finishes and a tick when it has pasted. Esc cancels. **Undo** sits on the bar for a moment after a paste; **Try again** re-runs a failed recording.
 - **Hands-free when you need it.** Tap Space while holding the chord and let go; Speakhold keeps listening until you press the chord again.
 
 <p align="center">
@@ -36,8 +47,16 @@ Speakhold is a push-to-talk voice typing tool for Mac, built as a free replaceme
 </p>
 
 - **Polish on your Mac.** On macOS 26 with Apple Intelligence, Speakhold strips "um"s, fixes punctuation and spells the names in your personal dictionary correctly, on-device, no key, nothing sent anywhere. Prefer Claude? Add your API key and pick it under Cleanup. Either way, spoken commands ("new paragraph", "full stop", "comma", "question mark") always work, text replacements (`my email -> you@…`) run last, and the raw transcript is pasted if a model fails or wanders.
+
+## Meetings
+
 - **Takes the minutes.** "Record meeting" captures both sides of a Zoom, Meet or Teams call on your Mac, no virtual audio driver and no bot. It transcribes on the Neural Engine with you and each far-side voice labelled, folds in the notes you typed during the call and the moments you marked, names the meeting from your calendar, writes Summary / Decisions / Action items / Open questions (and a follow-up email if you want one) and saves one markdown file. "Catch me up" shows the last two minutes when you drifted. Speakhold offers to record when it notices an app on a call. The notes are written in the background after you stop (menu bar shows progress, a notification opens the file), so dictation never waits. Files go to `~/Documents/Speakhold Meetings` or a folder you choose. **Add a Claude key for the notes**: it reads the whole transcript. Without one, Apple Intelligence writes them on-device in parts, which is fine for a short call and weak on a long one. Audio never leaves the Mac either way. It stops itself when the call app lets go of the microphone.
 - **Notes by Claude without an API key.** Have Claude Code installed and the meeting notes go through it under your own Claude plan. Otherwise add an API key, or let Apple Intelligence write them on-device.
+- **While it records.** Type your own notes in the meeting window and the transcript expands them; tap the chord once to mark a moment; *Catch me up* shows the last two minutes as text; dictation keeps working.
+- **Afterwards.** The pill shows *Notes 41%* while the job runs in the background, a notification opens the file, and the audio is deleted. How it compares: [Fireflies](https://sturzael.github.io/speakhold/vs/fireflies.html).
+
+## The app
+
 - **Scriptable.** `Speakhold --toggle` (or `open speakhold://toggle`) talks to the running app: `--start`, `--stop`, `--cancel`, `--settings`, `--history`. Wire it to SketchyBar, Raycast or a Shortcut.
 - **Native and tiny.** Swift + SwiftUI + AppKit. Menu-bar only. Launch at login. History window with one-click copy.
 
