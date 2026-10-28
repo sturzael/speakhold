@@ -21,8 +21,17 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Do I need a virtual audio driver like BlackHole?", "acceptedAnswer": {"@type": "Answer", "text": "No. Speakhold uses a Core Audio process tap, built into macOS 14.2 and newer, behind the \"System Audio Recording Only\" permission."}}, {"@type": "Question", "name": "Does the other side know?", "acceptedAnswer": {"@type": "Answer", "text": "Nothing joins the call. Check your local recording-consent rules; Speakhold does not announce itself."}}, {"@type": "Question", "name": "How good are the notes?", "acceptedAnswer": {"@type": "Answer", "text": "With Claude Code or a Claude key, the whole transcript is read and you get Summary, Decisions, Action items and Open questions. The on-device fallback is fine for short calls and weak on long ones, and the file says which was used."}}]}</script>
 </head>
 <body>
+<header class="nav" aria-label="Site">
+  <a class="brand" href="../"><img src="../icon.png" alt="" width="28" height="28">Speakhold</a>
+  <ul>
+    <li><a href="../#how">How it works</a></li>
+    <li><a href="../meeting-notes.html">Meeting notes</a></li>
+    <li><a href="../#compared">Compared</a></li>
+    <li><a href="https://github.com/sturzael/speakhold">GitHub</a></li>
+  </ul>
+  <a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest">Download</a>
+</header>
 <main class="page">
-  <nav class="site"><a href="../">Speakhold</a><a href="../meeting-notes.html">Meeting notes</a><a href="https://github.com/sturzael/speakhold">GitHub</a><a href="https://github.com/sturzael/speakhold/releases/latest">Download</a></nav>
   <h1 class="page-title">Speakhold vs Fireflies</h1>
   <p class="lede">Fireflies sends a bot into the meeting and keeps the recording in the cloud. Speakhold records on your Mac, nobody sees a bot join, and the audio is deleted once the notes are written.</p>
   <h2>Two different ideas</h2>
@@ -46,8 +55,29 @@
   <h2>Try it</h2>
   <div class="cta"><a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest">Download Speakhold for Mac</a><a class="btn ghost" href="https://github.com/sturzael/speakhold">Source on GitHub</a></div>
 <p class="small">Free · MIT · macOS 14+ · Apple Silicon · <code>brew install --cask sturzael/tap/speakhold</code></p>
-  <p class="compare">Compared with <a href="../vs/willow-voice.html">Willow Voice</a> · <a href="../vs/wispr-flow.html">Wispr Flow</a> · <a href="../vs/superwhisper.html">Superwhisper</a> · <a href="../vs/macwhisper.html">MacWhisper</a> · <a href="../vs/fireflies.html">Fireflies</a> · <a href="../vs/otter.html">Otter</a> · <a href="../record-zoom-call-mac-without-bot.html">How to record a call without a bot</a></p>
-  <footer>Built on <a href="https://github.com/argmaxinc/WhisperKit">WhisperKit</a>. Made in Wellington, New Zealand by <a href="https://wildinteractive.co.nz">Wild Interactive</a>. <a href="../privacy.html">Privacy</a> · <a href="../terms.html">Terms</a> · <a href="https://github.com/sturzael/speakhold/blob/main/CHANGELOG.md">Changelog</a></footer>
+  <p class="compare-links">Compared with <a href="../vs/willow-voice.html">Willow Voice</a> · <a href="../vs/wispr-flow.html">Wispr Flow</a> · <a href="../vs/superwhisper.html">Superwhisper</a> · <a href="../vs/macwhisper.html">MacWhisper</a> · <a href="../vs/fireflies.html">Fireflies</a> · <a href="../vs/otter.html">Otter</a> · <a href="../record-zoom-call-mac-without-bot.html">How to record a call without a bot</a></p>
 </main>
+<footer class="footer">
+    <div class="container">
+      <h2>Cancel two subscriptions. Keep your voice on your Mac.</h2>
+      <p class="sub">Free, open source, 12 MB. If it replaces a subscription for you, a star helps the next person find it.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest">Download free for Mac</a>
+        <a class="btn outline" href="https://github.com/sturzael/speakhold">Star on GitHub</a>
+      </div>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="../meeting-notes.html">Meeting notes</a></li>
+          <li><a href="../record-zoom-call-mac-without-bot.html">Record a call, no bot</a></li>
+          <li><a href="../#compared">Compared</a></li>
+          <li><a href="https://github.com/sturzael/speakhold/blob/main/CHANGELOG.md">Changelog</a></li>
+          <li><a href="../privacy.html">Privacy</a></li>
+          <li><a href="../terms.html">Terms</a></li>
+        </ul>
+        <p class="credit">Built on <a href="https://github.com/argmaxinc/WhisperKit">WhisperKit</a> · Made in Wellington, New Zealand by <a href="https://wildinteractive.co.nz">Wild Interactive</a> · MIT · 2026</p>
+      </nav>
+    </div>
+    <div class="mark" aria-hidden="true"><span>speakhold</span></div>
+  </footer>
 </body>
 </html>
