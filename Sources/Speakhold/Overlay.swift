@@ -4,7 +4,7 @@ import SwiftUI
 /// Floating bar at the screen edge, modelled on Willow's: a tiny tab while idle, a dark pill that streams the
 /// words as you speak while the hotkey is held. Non-activating so focus stays in the target app.
 final class OverlayModel: ObservableObject {
-    enum Phase: Equatable { case hidden, idle, listening, transcribing, cleaning, done(String), error(String), meeting(String), offer(String), job(String) }
+    enum Phase: Equatable { case hidden, idle, listening, transcribing, cleaning, done(String), error(String), meeting(String), offer(String), job(String), ending(String) }
     /// Speech model loaded.
     @Published var ready = false
     @Published var phase: Phase = .hidden
@@ -20,6 +20,7 @@ final class OverlayModel: ObservableObject {
     var onUndo: (() -> Void)?
     var onRetry: (() -> Void)?
     var onAccept: (() -> Void)?
+    var onKeep: (() -> Void)?
     var onHover: ((Bool) -> Void)?
 
     /// Raw levels arrive on whatever scale the microphone's gain gives (a quiet USB mic peaks around 0.4, a hot one
@@ -71,7 +72,7 @@ struct OverlayView: View {
     }
 
     private var isLit: Bool {
-        switch model.phase { case .listening, .transcribing, .cleaning, .done, .error, .meeting, .offer, .job: return true; default: return false }
+        switch model.phase { case .listening, .transcribing, .cleaning, .done, .error, .meeting, .offer, .job, .ending: return true; default: return false }
     }
     private var docked: Bool { position == .rightEdge }
 
@@ -94,7 +95,7 @@ struct OverlayView: View {
         switch model.phase {
         case .hidden: return "hidden"; case .idle: return "idle"; case .listening: return "listening"
         case .transcribing: return "transcribing"; case .cleaning: return "cleaning"; case .done: return "done"; case .error: return "error"
-        case .meeting: return "meeting"; case .offer: return "offer"; case .job: return "job"
+        case .meeting: return "meeting"; case .offer: return "offer"; case .job: return "job"; case .ending: return "ending"
         }
     }
 
@@ -168,6 +169,10 @@ struct OverlayView: View {
             case .job(let label):   // the resting state while meeting notes are being written
                 ThinkingDots(color: Ink.amber)
                 Text(label).font(.system(size: 13, weight: .medium)).monospacedDigit().foregroundStyle(Ink.text)
+            case .ending(let label):   // the call app let go of the microphone: stopping unless told otherwise
+                RecordingDot()
+                Text(label).font(.system(size: 13)).monospacedDigit().foregroundStyle(Ink.text)
+                chip("Keep going") { model.onKeep?() }
             case .offer(let app):
                 RecordingDot()
                 Text("\(app) is on a call. Record it?").font(.system(size: 13)).foregroundStyle(Ink.text)
@@ -312,7 +317,7 @@ final class OverlayPanel: NSPanel {
         switch model.phase {
         case .done: return model.onUndo != nil
         case .error: return model.canRetry
-        case .offer: return true
+        case .offer, .ending: return true
         default: return false
         }
     }

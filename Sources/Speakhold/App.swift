@@ -196,6 +196,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     private var diarizer: Any?        // FluidMeetingDiarizer
     private var callTimer: Timer?
     private var offeredPIDs: Set<pid_t> = []
+    /// The apps that were on a call when this recording started; when they all let go of the mic, the call is over.
+    private var callPIDs: Set<pid_t> = []
+    private var callGoneSince: Date?
+    private var endingAt: Date?
     private var offerShownAt: Date?
 
     @objc private func openMeetingsFolder() {
@@ -250,6 +254,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 overlay.show(.error("Could not record the call: \(error.localizedDescription)")); hideSoon(4); return
             }
             meeting = session
+            callPIDs = Set(CallDetector.activeCalls().map(\.pid)); callGoneSince = nil; endingAt = nil
             meetingItem?.title = "Stop meeting recording"
             meetingState.active = true
             meetingState.title = session.title
@@ -412,7 +417,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     private func startCallWatch() {
         guard #available(macOS 14.2, *) else { return }
         callTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
-            guard let self, Settings.shared.meetingAutoOffer, self.meeting == nil, !self.isRecording, !self.busy else { return }
+            guard let self else { return }
+            if self.meeting != nil { self.watchCallEnd(); return }
+            guard Settings.shared.meetingAutoOffer, !self.isRecording, !self.busy else { return }
             let calls = CallDetector.activeCalls()
             let live = Set(calls.map(\.pid))
             self.offeredPIDs.formIntersection(live)   // an app that stopped can be offered again next time
@@ -429,6 +436,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             self.offerShownAt = Date()
             self.overlay.show(.offer(call.name))
         }
+    }
+
+    /// While recording: once every app that was on the call has let go of the microphone for ten seconds, count
+    /// down on the pill and stop, unless "Keep going" is tapped or the app picks the mic up again.
+    @available(macOS 14.2, *)
+    private func watchCallEnd() {
+        guard !callPIDs.isEmpty else { return }
+        let live = Set(CallDetector.activeCalls().map(\.pid))
+        if !callPIDs.isDisjoint(with: live) {
+            callGoneSince = nil
+            if endingAt != nil { endingAt = nil; overlay.model.onKeep = nil; overlay.hide() }
+            return
+        }
+        guard let gone = callGoneSince else { callGoneSince = Date(); return }
+        guard Date().timeIntervalSince(gone) >= 10 else { return }
+        if endingAt == nil {
+            endingAt = Date().addingTimeInterval(45)
+            overlay.model.onKeep = { [weak self] in
+                guard let self else { return }
+                self.callPIDs = []; self.endingAt = nil; self.overlay.model.onKeep = nil
+                self.overlay.hide()
+            }
+            if Settings.shared.playSounds { NSSound(named: "Tink")?.play() }
+        }
+        let left = max(0, Int(endingAt!.timeIntervalSinceNow.rounded()))
+        if left == 0 {
+            endingAt = nil; callPIDs = []; overlay.model.onKeep = nil
+            toggleMeeting()
+            return
+        }
+        overlay.show(.ending("Call ended. Writing the notes in \(left) s"))
     }
 
     @objc private func openSettings() {

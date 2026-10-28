@@ -123,11 +123,36 @@ actor Transcriber {
                 for seg in r.segments {
                     let text = Transcriber.tidy(seg.text)
                     guard !text.isEmpty, seg.noSpeechProb < 0.8 else { continue }
+                    guard !Transcriber.looksHallucinated(text, noSpeech: seg.noSpeechProb, logProb: seg.avgLogprob) else { continue }
+                    // The same short line twice in a row inside one region is the decoder looping, not the speaker.
+                    if let last = out.last, last.text == text, text.split(separator: " ").count < 6, offset + Double(seg.start) - last.end < 2 { continue }
                     out.append(Segment(start: offset + Double(seg.start), end: offset + Double(seg.end), text: text))
                 }
             }
         }
         return out.sorted { $0.start < $1.start }
+    }
+
+    /// Whisper's stock lines over quiet audio: "Thank you." (its favourite), "Thanks for watching.", a lone "you".
+    /// Eight minutes of an empty room came back as "Thank you. Thankyou. Thank you." on 28 Oct 2026. A matching line
+    /// is dropped when the decoder itself was unsure of it, or when it is nothing but the phrase repeated.
+    static let stockLines: Set<String> = [
+        "thank you", "thankyou", "thanks", "thank you very much", "thanks for watching", "thank you for watching",
+        "thanks for listening", "thank you for listening", "see you next time", "see you in the next video",
+        "subtitles by the amara org community", "the end", "you", "bye", "okay", "so", "oh", "yeah", "yes", "hmm", "mm",
+    ]
+    static func looksHallucinated(_ text: String, noSpeech: Float, logProb: Float) -> Bool {
+        let norm = text.lowercased().unicodeScalars.map { CharacterSet.letters.contains($0) ? Character($0) : " " }
+            .reduce(into: "") { $0.append($1) }
+            .split(separator: " ").joined(separator: " ")
+        guard !norm.isEmpty else { return true }
+        // Only the phrase, repeated: "thank you thankyou thank you".
+        let stripped = norm.replacingOccurrences(of: "thank you", with: "").replacingOccurrences(of: "thankyou", with: "")
+            .replacingOccurrences(of: "thanks", with: "").replacingOccurrences(of: "you", with: "")
+            .trimmingCharacters(in: .whitespaces)
+        if stripped.isEmpty, norm.count > "thank you".count { return true }
+        guard stockLines.contains(norm) else { return false }
+        return noSpeech > 0.15 || logProb < -0.5
     }
 
     /// Energy gate: 20 ms frames, threshold a few times the quietest fifth of the recording, regions merged across
