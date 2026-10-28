@@ -3,7 +3,7 @@
 Native Swift menu-bar app: hold-to-talk dictation (WhisperKit on the Neural Engine) and meeting recording with notes. Public, MIT; keep client and staff names out of code, demo strings and docs.
 
 ## Build and run
-- `swift build -c release` for a quick compile; `./build.sh` makes `dist/Speakhold.app`, signs it (self-signed "Speakhold Dev", stable designated requirement so TCC grants persist) and installs to `~/Applications`. Relaunch with `pkill -x Speakhold; open -a Speakhold`. Never relaunch while the user is on a call (`Speakhold --calls` lists apps using the mic).
+- `swift build -c release` for a quick compile; `./build.sh` makes `dist/Speakhold.app`, signs it (self-signed "Speakhold Dev", stable designated requirement so TCC grants persist) and installs to `~/Applications`. Relaunch by pid, never `pkill -x` (a headless `--meeting-from-files` run shares the process name): `apppid=$(pgrep -f "MacOS/Speakhold$"); kill $apppid; open -a Speakhold`. Never relaunch while the user is on a call (`Speakhold --calls` lists apps using the mic).
 - Anything that touches the microphone, system audio or the screen must run as the signed bundle (`open -n -a Speakhold --args …`): a bare binary or a `!` command from an agent session gets silence, not an error, because TCC never prompts it.
 - Settings observers: defer with `DispatchQueue.main.async` (publishing during a view update crashes).
 
@@ -17,4 +17,4 @@ Native Swift menu-bar app: hold-to-talk dictation (WhisperKit on the Neural Engi
 ## Where things are
 - `Overlay.swift` the pill and its states; `SettingsView.swift` the ink design kit and tabs; `Cleanup.swift` polish engines (Apple Foundation Models guided generation, Claude); `Meeting*.swift` capture (Core Audio process tap + mic), session, notes, Parakeet/diarisation (FluidAudio); `App.swift` menu bar, hotkeys, meeting lifecycle and the background notes job; `main.swift` headless flags.
 - Apple Foundation Models holds far less than its nominal 4k tokens of real text (about 400 plain words per call with a brief and an answer): strip markup, map-reduce, watch for condense passes that stop shrinking. Guided generation (`@Generable`) stops the prefacing and refusals that plain `respond(to:)` produces.
-- Release: bump `CFBundleShortVersionString`/`CFBundleVersion` in `Resources/Info.plist`, tag, GitHub release zip, update the Homebrew cask SHA in `sturzael/homebrew-tap`. The landing page is `docs/index.html` (GitHub Pages from `main:/docs`).
+- Release: bump `CFBundleShortVersionString`/`CFBundleVersion` in `Resources/Info.plist`, date the CHANGELOG block, run `scripts/site-dates.sh` (sitemap lastmod per page from git, version + updated stamp on the home page and llms.txt), tag, GitHub release zip (`ditto -c -k --keepParent`), update the Homebrew cask version + SHA in `sturzael/homebrew-tap` by hand until the `TAP_TOKEN` secret exists. The landing page is `docs/index.html` (GitHub Pages from `main:/docs`).
