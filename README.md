@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip"><img src="https://img.shields.io/github/v/release/sturzael/speakhold?label=download&color=5865F2" alt="Download"></a>
+  <a href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.dmg"><img src="https://img.shields.io/github/v/release/sturzael/speakhold?label=download&color=5865F2" alt="Download"></a>
   <a href="https://github.com/sturzael/speakhold/actions"><img src="https://img.shields.io/github/actions/workflow/status/sturzael/speakhold/build.yml?label=build" alt="Build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B%20Apple%20Silicon-black" alt="macOS 14+">
@@ -64,11 +64,13 @@ If it replaces a subscription for you, a star on the repo helps the next person 
 
 ## Install
 
-**Download:** [Speakhold.app.zip](https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip) (12 MB), unzip, drag to Applications, open.
-The app is not notarized yet, so if macOS says it cannot check it: on macOS 14 right-click → **Open**; on macOS 15 and later, System Settings → Privacy & Security → **Open Anyway**. Or clear the flag:
+**Download:** [Speakhold.dmg](https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.dmg) (12 MB), open it, drag Speakhold to Applications, open the app.
+Not notarized yet, so if macOS says it cannot check the app: macOS 15 and later, System Settings → Privacy & Security → **Open Anyway**; macOS 14, right-click → **Open**. Pictures on the [install page](https://speakhold.wildinteractive.app/install.html).
+
+**One line, no dialog** (the script is [docs/install.sh](docs/install.sh); it downloads the zip, installs to Applications, opens the app):
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/Speakhold.app
+curl -fsSL https://speakhold.wildinteractive.app/install.sh | sh
 ```
 
 **Homebrew:**

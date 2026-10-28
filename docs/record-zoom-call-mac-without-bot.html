@@ -25,10 +25,11 @@
   <a class="brand" href="./"><img src="icon.png" alt="" width="28" height="28">Speakhold</a>
   <ul>
     <li><a href="./#how">How it works</a></li>
-    <li><a href="meeting-notes.html">Meeting notes</a></li>
+    <li><a href="install.html">Install</a></li>
+          <li><a href="meeting-notes.html">Meeting notes</a></li>
     <li><a href="./#compared">Compared</a></li>
     </ul>
-  <a class="stars" href="https://github.com/sturzael/speakhold" title="Star on GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.7.8-4.9 4.6 1.3 6.6L12 17.3l-6 3.3 1.3-6.6L2.4 9.4l6.7-.8z"/></svg><span>GitHub</span><b data-stars hidden></b></a><a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip">Download</a>
+  <a class="stars" href="https://github.com/sturzael/speakhold" title="Star on GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.7.8-4.9 4.6 1.3 6.6L12 17.3l-6 3.3 1.3-6.6L2.4 9.4l6.7-.8z"/></svg><span>GitHub</span><b data-stars hidden></b></a><a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.dmg">Download</a>
 </header>
 <main class="page">
   <h1 class="page-title">How to record a Zoom, Meet or Teams call on a Mac without a bot</h1>
@@ -39,7 +40,7 @@
 <p>Apple added Core Audio process taps: an app can ask, with your permission, for what the Mac is playing, mixed down, without a kernel extension or a virtual device. The permission is called "System Audio Recording Only" and sits in System Settings under Privacy &amp; Security, Screen &amp; System Audio Recording. Speakhold records that stream and your microphone as two separate files, so your side and the other side are labelled without any speaker-separation guesswork.</p>
 <h2>Step by step</h2>
 <ol>
-<li>Install Speakhold: <a href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip">download the zip</a>, unzip, drag to Applications, open. If macOS says it cannot check the app, right-click → Open (macOS 14) or System Settings → Privacy &amp; Security → Open Anyway (macOS 15 and later). Or <code>brew install --cask sturzael/tap/speakhold</code>.</li>
+<li>Install Speakhold: <a href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.dmg">download the disk image</a>, drag to Applications, open. The <a href="install.html">install page</a> covers the first-launch dialog, a one-line Terminal install and Homebrew.</li>
 <li>Grant Microphone and Accessibility when asked. The first meeting recording also asks for System Audio Recording Only.</li>
 <li>Start your Zoom, Meet, Teams, FaceTime or Slack call as normal, in any app or browser tab.</li>
 <li>Click the Speakhold menu bar icon and choose <em>Record meeting</em>. Or leave "Offer to record when an app starts a call" on in Settings and tap <em>Record</em> on the pill when it notices the call. A red dot and the elapsed time show on the pill.</li>
@@ -55,7 +56,7 @@
 <p>Speakhold does not announce that it is recording. Recording laws differ by place; in some you must tell the other side, in some you need their agreement. Check before you press record.</p>
 <div class="faq"><h3>Does it work with a browser-based call?</h3><p>Yes. The tap captures whatever the Mac plays, so Meet in Chrome, Teams in Safari and Zoom in the app all work the same way.</p><h3>Does it need an Intel Mac or Apple Silicon?</h3><p>Apple Silicon, macOS 14.2 or newer for meetings (dictation works from 14.0).</p><h3>Can I record a meeting in the room, not a call?</h3><p>Yes. Press Record meeting with no call running; it records the microphone only and will not auto-stop, since there is no call app to watch.</p><h3>Where are the recordings kept?</h3><p>Nowhere, once the notes are written. While a recording runs the audio sits in a temporary folder on the Mac; if writing the notes fails, it is kept and the notification says where.</p></div>
   <h2>Try it</h2>
-  <div class="cta"><a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip">Download Speakhold for Mac</a><a class="btn ghost" href="https://github.com/sturzael/speakhold">Source on GitHub</a></div>
+  <div class="cta"><a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.dmg">Download Speakhold for Mac</a><a class="btn ghost" href="https://github.com/sturzael/speakhold">Source on GitHub</a></div>
 <p class="small">Free · MIT · macOS 14+ · Apple Silicon · <code>brew install --cask sturzael/tap/speakhold</code></p>
   <p class="compare-links">Compared with <a href="vs/willow-voice.html">Willow Voice</a> · <a href="vs/wispr-flow.html">Wispr Flow</a> · <a href="vs/superwhisper.html">Superwhisper</a> · <a href="vs/macwhisper.html">MacWhisper</a> · <a href="vs/fireflies.html">Fireflies</a> · <a href="vs/otter.html">Otter</a> · <a href="record-zoom-call-mac-without-bot.html">How to record a call without a bot</a></p>
 </main>
@@ -64,11 +65,12 @@
       <h2>Cancel two subscriptions. Keep your voice on your Mac.</h2>
       <p class="sub">Free, open source, 12 MB. If it replaces a subscription for you, a star helps the next person find it.</p>
       <div class="cta">
-        <a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.app.zip">Download free for Mac</a>
+        <a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.dmg">Download free for Mac</a>
         <a class="btn outline" href="https://github.com/sturzael/speakhold">Star on GitHub</a>
       </div>
       <nav aria-label="Footer">
         <ul>
+          <li><a href="install.html">Install</a></li>
           <li><a href="meeting-notes.html">Meeting notes</a></li>
           <li><a href="record-zoom-call-mac-without-bot.html">Record a call, no bot</a></li>
           <li><a href="./#compared">Compared</a></li>

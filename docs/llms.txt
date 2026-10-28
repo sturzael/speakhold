@@ -6,6 +6,7 @@ Last updated: 2026-10-29 (v0.2.2)
 
 ## Pages
 - [Home](https://speakhold.wildinteractive.app/): what it does, how it compares, how it works
+- [Install](https://speakhold.wildinteractive.app/install.html): disk image, one-line Terminal install (`curl -fsSL https://speakhold.wildinteractive.app/install.sh | sh`), Homebrew, and the macOS "cannot check the app" steps
 - [Meeting notes](https://speakhold.wildinteractive.app/meeting-notes.html): recording both sides of a call without a bot, what the file contains, which model writes the notes
 - [Record a call on a Mac without a bot](https://speakhold.wildinteractive.app/record-zoom-call-mac-without-bot.html): step by step
 - [vs Willow Voice](https://speakhold.wildinteractive.app/vs/willow-voice.html)
