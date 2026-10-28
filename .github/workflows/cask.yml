@@ -1,0 +1,29 @@
+name: cask
+# When a release is published, point the Homebrew tap at it: new version, new sha256.
+# Needs a TAP_TOKEN secret: a fine-grained PAT with contents:write on sturzael/homebrew-tap.
+on:
+  release:
+    types: [published]
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the release zip
+        run: |
+          curl -sL -o Speakhold.app.zip "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/Speakhold.app.zip"
+          echo "SHA=$(sha256sum Speakhold.app.zip | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          echo "VERSION=${{ github.event.release.tag_name }}" | sed 's/=v/=/' >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          repository: sturzael/homebrew-tap
+          token: ${{ secrets.TAP_TOKEN }}
+          path: tap
+      - name: Update the cask
+        run: |
+          cd tap
+          sed -i -E "s/version \"[0-9.]+\"/version \"$VERSION\"/; s/sha256 \"[0-9a-f]+\"/sha256 \"$SHA\"/" Casks/speakhold.rb
+          git config user.name "speakhold-release"
+          git config user.email "noreply@github.com"
+          git add Casks/speakhold.rb
+          git commit -m "speakhold $VERSION" || exit 0
+          git push
