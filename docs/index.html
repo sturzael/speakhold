@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#fbfaf6">
 <title>Speakhold — Free, open-source dictation and meeting notes for Mac</title>
-<meta name="description" content="Speakhold is a free, open-source dictation app for macOS. Hold a key, talk, release: your words land at the cursor. It also records both sides of a call and writes the notes. Everything runs on your Mac. A native Swift alternative to Willow Voice, Wispr Flow, Superwhisper and Fireflies.">
+<meta name="description" content="Hold a key to talk, press record to remember. Speakhold is free, open-source dictation and meeting notes for Mac: no subscription, no bot in your calls, no cloud. Replaces Willow, Wispr Flow, Superwhisper and Fireflies. It also records both sides of a call and writes the notes. Everything runs on your Mac. A native Swift alternative to Willow Voice, Wispr Flow, Superwhisper and Fireflies.">
 <link rel="canonical" href="https://speakhold.wildinteractive.app/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Speakhold — Free, open-source dictation and meeting notes for Mac">
-<meta property="og:description" content="Hold a key, talk, release. Records your calls and writes the notes too. On-device, native Swift, no subscription.">
+<meta property="og:description" content="Hold a key to talk. Press record to remember. Dictation and meeting notes for Mac: no subscription, no bot, no cloud.">
 <meta property="og:image" content="https://speakhold.wildinteractive.app/demo.gif">
 <meta property="og:url" content="https://speakhold.wildinteractive.app/">
 <meta name="twitter:card" content="summary_large_image">
@@ -26,42 +26,45 @@
   <div class="wrap">
   <header>
     <img src="icon.png" alt="Speakhold icon">
-    <div><span class="kicker"><i></i>Free · Open source · On your Mac</span></div>
+    <div><span class="kicker"><i></i>No subscription · No bot · No cloud</span></div>
     <h1>Speakhold.</h1>
-    <p class="tag">Two things, one small Mac app. <b>Dictation:</b> hold a key, talk, let go. <b>Meeting notes:</b> press record on a call, get the notes when it ends.</p>
-    <p class="sub">Whisper runs on the Mac and the audio never leaves it. No bot joins your calls. The notes are written by Claude Code under your own plan, your own key, or Apple Intelligence.</p>
+    <p class="tag">Hold a key to <b>talk</b>. Press record to <b>remember</b>.</p>
+    <p class="sub">Dictation that lands wherever your cursor is, and meeting notes that write themselves when the call ends. Both run on your Mac. Free, open source, 12 MB.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest">Download for Mac</a>
       <a class="btn ghost" href="https://github.com/sturzael/speakhold">View on GitHub →</a>
     </div>
-    <p class="small">macOS 14+ · Apple Silicon · MIT licence · no account, no subscription</p>
+    <p class="small">macOS 14+ · Apple Silicon · MIT licence · no account</p>
   </header>
   </div>
 
-  <img class="demo" src="demo.gif" alt="Speakhold bar: your words appear as you speak, then the sentence is pasted">
+  <img class="demo" src="demo.gif" alt="Speakhold bar: hold the key, the bar moves with your voice, let go and the sentence is pasted">
 
   <pre><code>brew install --cask sturzael/tap/speakhold</code></pre>
 
-  <p class="note"><b>0.2 is out:</b> meeting recording with notes written in the background, polish on-device with Apple Intelligence, Undo on the bar, hands-free lock, text replacements, a Dock icon and scripting. <a href="https://github.com/sturzael/speakhold/blob/main/CHANGELOG.md">What changed</a>.</p>
-
-  <h2>What it does</h2>
+  <h2>Two things you were paying two subscriptions for</h2>
   <div class="grid">
-    <div class="card"><h3>Dictation</h3><p>Hold a chord, speak, let go. The sentence is pasted into whatever app is in front, cleaned up. Replaces Willow Voice, Wispr Flow and Superwhisper.</p></div>
-    <div class="card"><h3>Meeting notes</h3><p>Press record on a Zoom, Meet or Teams call. It records both sides on your Mac, stops when the call ends, and writes the notes and the transcript to one file. Replaces Fireflies and the other bots. <a href="meeting-notes.html">How it works</a>.</p></div>
+    <div class="card"><h3>Talk, and it types</h3><p>Hold left ⌃ + left ⌥, say the sentence, let go. It lands in Slack, Mail, Xcode, the browser, wherever the cursor is, with the ums gone and your names spelled right. Replaces Willow Voice, Wispr Flow and Superwhisper.</p></div>
+    <div class="card"><h3>Record, and it remembers</h3><p>Press record on a Zoom, Meet or Teams call. Nothing joins the meeting. When the call ends it stops itself and writes Summary, Decisions, Action items and the full transcript to one file. Replaces Fireflies and Otter. <a href="meeting-notes.html">How it works</a>.</p></div>
   </div>
 
-  <h2>Why people switch from Willow, Wispr Flow and Superwhisper</h2>
+  <h2>Three things it refuses to do</h2>
   <div class="grid">
-    <div class="card"><h3>Hold, talk, let go</h3><p>A small tab docked to the screen edge opens into a short bar of glowing waveform while you hold the key. Let go and the sentence lands at the cursor.</p></div>
-    <div class="card"><h3>100% on-device</h3><p>Speech-to-text runs with WhisperKit on the Apple Neural Engine. Works offline. Audio never leaves the machine.</p></div>
-    <div class="card"><h3>Any hotkey chord</h3><p>Left and right modifiers are different keys. Default is left ⌃ + left ⌥, which collides with nothing. Hold to talk or press to toggle.</p></div>
-    <div class="card"><h3>Pastes anywhere</h3><p>Slack, Gmail, Xcode, Terminal, Notes, the browser. Wherever the cursor is. Your clipboard is restored afterwards.</p></div>
-    <div class="card"><h3>Native, no Electron</h3><p>One Swift binary, a 12 MB download. No Electron, no Tauri, no background helpers. Lives in the menu bar; the Dock icon is optional.</p></div>
-    <div class="card"><h3>Polish on your Mac</h3><p>On macOS 26, Apple Intelligence removes fillers, fixes punctuation and spells names from your dictionary, on-device, no key. Prefer Claude? Add your own key. Spoken commands and text replacements always work.</p></div>
-    <div class="card"><h3>Undo, lock, retry</h3><p>Undo sits on the bar for three seconds after a paste. Tap Space while holding to go hands-free. Try again re-runs a failed recording.</p></div>
-    <div class="card"><h3>Takes the minutes</h3><p>Record both sides of a Zoom, Meet or Teams call, no bot and no virtual driver. It stops itself when the call ends; the notes are written in the background and a notification opens the file. Audio never leaves the Mac. <a href="meeting-notes.html">How meetings work</a>.</p></div>
-    <div class="card"><h3>Scriptable</h3><p><code>speakhold://toggle</code> or <code>Speakhold --toggle</code> drives the running app from SketchyBar, Raycast or a Shortcut.</p></div>
-    <div class="card"><h3>Open source</h3><p>MIT licensed. Read every line that touches your microphone. Issues and pull requests welcome.</p></div>
+    <div class="card"><h3>Charge you monthly</h3><p>Willow is US$15 a month. Fireflies is per seat. Speakhold is MIT licensed and free, forever, because a Mac already has the chip for this.</p></div>
+    <div class="card"><h3>Send a bot into your call</h3><p>Clients notice the notetaker. Some ask it to leave. Speakhold records your microphone and the Mac's audio through macOS itself, so the other side sees nobody.</p></div>
+    <div class="card"><h3>Upload your voice</h3><p>Whisper runs on the Neural Engine. Audio is transcribed on the Mac and deleted. The only thing that can leave is transcript text, and only if you choose Claude for the notes.</p></div>
+  </div>
+
+  <p class="note"><b>Why it exists.</b> I was paying for Willow to dictate and Fireflies to take notes, and both sent my audio to someone else's server. I wrote one small Swift app that does both on the Mac and open-sourced it. If it replaces a subscription for you, <a href="https://github.com/sturzael/speakhold">a star helps the next person find it</a>.</p>
+
+  <h2>What else is in the box</h2>
+  <div class="grid">
+    <div class="card"><h3>Any hotkey chord</h3><p>Left and right modifiers are different keys, so the default collides with nothing. Hold to talk, press to toggle, tap Space to go hands-free.</p></div>
+    <div class="card"><h3>Notes by your Claude plan</h3><p>If Claude Code is installed, the notes go through it under your own subscription. No API key, no API bill. Or your own key, or Apple Intelligence on-device.</p></div>
+    <div class="card"><h3>Polish on your Mac</h3><p>On macOS 26, Apple Intelligence removes fillers, fixes punctuation and spells names from your dictionary. Spoken commands and text replacements always work.</p></div>
+    <div class="card"><h3>Undo, retry, mark</h3><p>Undo sits on the bar after a paste. Try again re-runs a failed recording. Tap the chord once during a call to mark a moment.</p></div>
+    <div class="card"><h3>Native, no Electron</h3><p>One Swift binary. Lives in the menu bar; the Dock icon is optional. Launch at login.</p></div>
+    <div class="card"><h3>Scriptable</h3><p><code>speakhold://toggle</code> or <code>Speakhold --toggle</code> drives it from SketchyBar, Raycast or a Shortcut.</p></div>
   </div>
 
   <h2>The bar</h2>
