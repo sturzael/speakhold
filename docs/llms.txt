@@ -1,0 +1,21 @@
+# Speakhold
+
+> Free, open-source dictation and meeting notes for macOS. Hold a key to talk and the words land at the cursor; press record on a call and the notes are written when it ends. No subscription, no bot joins the call, no cloud: Whisper runs on the Mac and the audio is deleted. Notes are written by Claude Code under the user's own plan, their own Claude API key, or Apple Intelligence on-device. MIT licence, native Swift, macOS 14+, Apple Silicon.
+
+## Pages
+- [Home](https://speakhold.wildinteractive.app/): what it does, how it compares, how it works
+- [Meeting notes](https://speakhold.wildinteractive.app/meeting-notes.html): recording both sides of a call without a bot, what the file contains, which model writes the notes
+- [Record a call on a Mac without a bot](https://speakhold.wildinteractive.app/record-zoom-call-mac-without-bot.html): step by step
+- [vs Willow Voice](https://speakhold.wildinteractive.app/vs/willow-voice.html)
+- [vs Wispr Flow](https://speakhold.wildinteractive.app/vs/wispr-flow.html)
+- [vs Superwhisper](https://speakhold.wildinteractive.app/vs/superwhisper.html)
+- [vs MacWhisper](https://speakhold.wildinteractive.app/vs/macwhisper.html)
+- [vs Fireflies](https://speakhold.wildinteractive.app/vs/fireflies.html)
+- [vs Otter.ai](https://speakhold.wildinteractive.app/vs/otter.html)
+- [Privacy](https://speakhold.wildinteractive.app/privacy.html)
+- [Terms](https://speakhold.wildinteractive.app/terms.html)
+
+## Source and install
+- Repository: https://github.com/sturzael/speakhold (MIT)
+- Download: https://github.com/sturzael/speakhold/releases/latest
+- Homebrew: brew install --cask sturzael/tap/speakhold
