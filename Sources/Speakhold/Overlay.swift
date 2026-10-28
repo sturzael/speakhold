@@ -20,6 +20,7 @@ final class OverlayModel: ObservableObject {
     var onUndo: (() -> Void)?
     var onRetry: (() -> Void)?
     var onAccept: (() -> Void)?
+    var onDecline: (() -> Void)?
     var onKeep: (() -> Void)?
     var onHover: ((Bool) -> Void)?
 
@@ -177,6 +178,7 @@ struct OverlayView: View {
                 RecordingDot()
                 Text("\(app) is on a call. Record it?").font(.system(size: 13)).foregroundStyle(Ink.text)
                 chip("Record") { model.onAccept?() }
+                chip("Not now") { model.onDecline?() }
             case .hidden:
                 EmptyView()
             }

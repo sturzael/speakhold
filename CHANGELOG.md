@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **The call offer names the right app and can be declined.** The pill offered to record "an app" when Siri's speech daemon held the microphone; only real apps count now, and a browser's helper process is named after the browser. The offer has a "Not now" chip; a declined call is not offered again until that app lets go of the mic.
 - **A steadier, narrower pill.** The same small frame for listening, thinking, the tick, the meeting clock and the notes job, so the pill keeps one height and one width across states; fewer bars while listening so it reaches out less. The meeting clock is just the time, the notes job just the percentage.
 
 ## 0.2.1 — 2026-10-28

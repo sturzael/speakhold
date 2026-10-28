@@ -247,7 +247,11 @@ enum CallDetector {
             var psize = UInt32(MemoryLayout<pid_t>.size)
             var paddr = AudioObjectPropertyAddress(mSelector: kAudioProcessPropertyPID, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
             guard AudioObjectGetPropertyData(id, &paddr, 0, nil, &psize, &pid) == noErr, pid != me else { continue }
-            let name = NSRunningApplication(processIdentifier: pid)?.localizedName ?? "an app"
+            // Only apps count. System daemons also hold the microphone (corespeechd listens for Siri, for one)
+            // and have no NSRunningApplication; offering to record those read as "an app is on a call".
+            guard let app = NSRunningApplication(processIdentifier: pid), let raw = app.localizedName else { continue }
+            // A browser or Electron app holds the mic from a helper process: name the app, not the helper.
+            let name = raw.range(of: " Helper").map { String(raw[..<$0.lowerBound]) } ?? raw
             calls.append(Call(pid: pid, name: name))
         }
         return calls

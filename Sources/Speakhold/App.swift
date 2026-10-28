@@ -244,7 +244,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     @available(macOS 14.2, *)
     private func startMeeting() {
         guard !busy else { return }
-        overlay.model.onAccept = nil
+        overlay.model.onAccept = nil; overlay.model.onDecline = nil
         Task { @MainActor in
             guard await AudioRecorder.requestPermission() else {
                 overlay.show(.error("Microphone access is off. Grant it in System Settings → Privacy → Microphone.")); hideSoon(3); return
@@ -424,18 +424,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             let live = Set(calls.map(\.pid))
             self.offeredPIDs.formIntersection(live)   // an app that stopped can be offered again next time
             if case .offer = self.overlay.model.phase, let at = self.offerShownAt, Date().timeIntervalSince(at) > 25 {
-                self.overlay.model.onAccept = nil; self.overlay.hide(); self.offerShownAt = nil
+                self.dismissOffer()
             }
             guard let call = calls.first(where: { !self.offeredPIDs.contains($0.pid) }) else { return }
-            self.offeredPIDs.insert(call.pid)
+            self.offeredPIDs.insert(call.pid)   // declined or ignored, it is not offered again until the app lets go of the mic
             self.overlay.model.onAccept = { [weak self] in
                 guard let self else { return }
-                self.overlay.model.onAccept = nil
+                self.overlay.model.onAccept = nil; self.overlay.model.onDecline = nil
                 if #available(macOS 14.2, *) { self.startMeeting() }
             }
+            self.overlay.model.onDecline = { [weak self] in self?.dismissOffer() }
             self.offerShownAt = Date()
             self.overlay.show(.offer(call.name))
         }
+    }
+
+    private func dismissOffer() {
+        overlay.model.onAccept = nil; overlay.model.onDecline = nil
+        overlay.hide(); offerShownAt = nil
     }
 
     /// While recording: once every app that was on the call has let go of the microphone for ten seconds, count
