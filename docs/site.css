@@ -281,3 +281,4 @@ td:first-child{color:var(--muted-fg)}
 .page .faq{display:block;grid-template-columns:none;gap:0}
 .page .faq > *{animation:none;opacity:1;transform:none}
 .page .no{color:var(--muted-fg,#6d6a5f);font-weight:500}
+.page .btn.ghost{border:1px solid var(--border,#e5e2d8);background:var(--card,#fff);color:var(--fg,#2b2d35)}
