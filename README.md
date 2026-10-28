@@ -43,7 +43,7 @@ One native Swift binary, a 12 MB download, no Electron, no account, no subscript
 - **Hands-free when you need it.** Tap Space while holding the chord and let go; Speakhold keeps listening until you press the chord again.
 
 <p align="center">
-  <img src="docs/states.png" width="600" alt="The Speakhold bar in each state: idle tab, listening, transcribing, polishing, done, error">
+  <img src="docs/states.png" width="600" alt="The Speakhold pill in each state: idle tab docked to the screen edge, listening waveform, transcribing dots, polishing dots, pasted tick with Undo, the call offer with Record and Not now, the meeting clock, the notes job percentage, the call-ended countdown, and an error">
 </p>
 
 - **Polish on your Mac.** On macOS 26 with Apple Intelligence, Speakhold strips "um"s, fixes punctuation and spells the names in your personal dictionary correctly, on-device, no key, nothing sent anywhere. Prefer Claude? Add your API key and pick it under Cleanup. Either way, spoken commands ("new paragraph", "full stop", "comma", "question mark") always work, text replacements (`my email -> you@…`) run last, and the raw transcript is pasted if a model fails or wanders.
@@ -94,6 +94,7 @@ open ~/Applications/Speakhold.app
 2. Grant **Microphone** and **Accessibility** (Accessibility is what lets a menu-bar app see the hotkey and paste for you).
 3. The speech model (~630 MB) downloads once in the background. Status shows **Ready** when it is loaded.
 4. Click into any text field, hold **left ⌃ + left ⌥**, speak, release.
+5. For meetings, the first recording asks for **Screen & System Audio Recording**, which is how the other side of the call is heard. No bot joins.
 
 ## Settings
 
@@ -101,7 +102,7 @@ open ~/Applications/Speakhold.app
 |---|---|
 | **General** | Hotkey: click Record and press the keys you want (any mix of left/right ⌃ ⌥ ⇧ ⌘, fn, plus an optional F-key), hold vs toggle, microphone picker with a 3 s test, Whisper model (Large v3 Turbo, Large v3, Distil, Base), language, bar position (right edge / bottom right / bottom centre), idle tab on/off, sounds, launch at login |
 | **Cleanup** | Polish engine: Apple Intelligence (on-device, default on macOS 26) / Claude / off; the Claude key and model (polish, and meeting notes when Claude Code is not installed; or `ANTHROPIC_API_KEY`); personal dictionary; text replacements; style notes |
-| **Meetings** | Offer to record when an app starts a call, title and invitees from Calendar, transcription engine (Whisper / Parakeet), tell the far-side voices apart, which engine writes the notes (Claude with a key, otherwise on-device), follow-up email draft, where the files save |
+| **Meetings** | Offer to record when an app starts a call (Record / Not now on the pill; stops itself when the call app lets go of the mic), title and invitees from Calendar, transcription engine (Whisper / Parakeet), tell the far-side voices apart, which engine writes the notes (Claude with a key, otherwise on-device), follow-up email draft, where the files save |
 | **Permissions** | Microphone and Accessibility status with one-click prompts |
 
 ## How it compares
@@ -112,14 +113,14 @@ open ~/Applications/Speakhold.app
 | Audio stays on device | Yes | Cloud by default | Cloud | Yes | Yes |
 | Native Swift (no Electron/Tauri) | Yes | — | — | Yes | No (Tauri) |
 | Left/right-specific modifier chords | Yes | No | No | Partial | No |
-| AI cleanup with personal dictionary | Optional (your key) | Yes | Yes | Yes | No |
+| AI cleanup with personal dictionary | Yes, on-device (or your key) | Yes | Yes | Yes | No |
 | Open source | Yes | No | No | No | Yes |
 
 Prices and features as of October 2026; corrections welcome via PR.
 
 ## Privacy
 
-Audio is captured with AVAudioEngine, converted to 16 kHz mono, transcribed in-process and discarded. Polish runs on-device through Apple Intelligence. The only network call Speakhold can make is the Claude polish engine, and only if you choose it and provide a key. There is no telemetry, no analytics, no update check.
+Audio is captured with AVAudioEngine, converted to 16 kHz mono, transcribed in-process and discarded. Polish runs on-device through Apple Intelligence. Network use is limited to two things: the speech models download once from Hugging Face (Whisper ~630 MB, Parakeet ~600 MB if you pick it), and the Claude engines, only if you choose them, which send transcript text and never audio (through Claude Code under your own plan, or the API with your key). There is no telemetry, no analytics, no update check.
 
 ## Contributing
 
