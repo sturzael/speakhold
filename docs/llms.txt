@@ -2,6 +2,8 @@
 
 > Free, open-source dictation and meeting notes for macOS. Hold a key to talk and the words land at the cursor; press record on a call and the notes are written when it ends. No subscription, no bot joins the call, no cloud: Whisper runs on the Mac and the audio is deleted. Notes are written by Claude Code under the user's own plan, their own Claude API key, or Apple Intelligence on-device. MIT licence, native Swift, macOS 14+, Apple Silicon.
 
+Last updated: 2026-10-29 (v0.2.2)
+
 ## Pages
 - [Home](https://speakhold.wildinteractive.app/): what it does, how it compares, how it works
 - [Meeting notes](https://speakhold.wildinteractive.app/meeting-notes.html): recording both sides of a call without a bot, what the file contains, which model writes the notes
