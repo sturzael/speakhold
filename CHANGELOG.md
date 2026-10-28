@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Easier install.** The download is now a disk image with a drag-to-Applications window (also attached to 0.2.2), there is a one-line Terminal installer (`curl -fsSL https://speakhold.wildinteractive.app/install.sh | sh`) that avoids the Gatekeeper dialog, and an install page with the macOS 15 "Open Anyway" steps.
+
 ## 0.2.2 — 2026-10-29
 
 - **The call offer names the right app and can be declined.** The pill offered to record "an app" when Siri's speech daemon held the microphone; only real apps count now, and a browser's helper process is named after the browser. The offer has a "Not now" chip; a declined call is not offered again until that app lets go of the mic.
