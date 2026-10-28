@@ -584,6 +584,9 @@ struct SettingsView: View {
                 InkRow(label: "Tell the other voices apart", hint: "Speaker 1, 2, 3 on the far side, on-device. Downloads the voice models on first use.") {
                     Toggle("", isOn: $settings.meetingDiarise).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
+                InkRow(label: "Cancel speaker echo", hint: "For a desk microphone next to speakers: Apple's voice processing removes what the Mac is playing from your side, so the other person is not transcribed twice. Off with headphones.") {
+                    Toggle("", isOn: $settings.meetingEchoCancel).toggleStyle(InkToggleStyle()).labelsHidden()
+                }
             }
             InkCard(title: "Notes", note: "After you stop, the notes are written in the background: the menu bar shows the stage and percent, dictation keeps working, and a notification opens the file. Summary, Decisions, Action items, Open questions, then the full transcript, one markdown file per meeting.") {
                 InkRow(label: "Written by", hint: notesEngineHint, divider: false) {

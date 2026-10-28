@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 — 2026-10-28
+
+- **Silence filter tuned.** 0.2.0 applied Whisper's confidence thresholds to every line and lost some real but badly heard speech. They now apply to short lines only, where hallucinations live; a looping decoder is still dropped at any length. Measured on a 29-minute call: 95% of the words kept over the real part, half the junk after it gone.
+- **Cancel speaker echo** (Settings → Meetings → Transcript, off by default): Apple's voice processing on the meeting microphone, for a desk mic next to speakers. Leave it off with headphones.
+
 ## 0.2.0 — 2026-10-28
 
 - **The recording stops itself when the call ends.** Speakhold remembers which app was on the call when you pressed record; once that app has let go of the microphone for ten seconds, the pill counts down 45 seconds and stops, with a *Keep going* chip if the call is only reconnecting. Recordings started with no call app running (a meeting in the room) are left alone.

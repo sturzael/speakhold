@@ -139,6 +139,8 @@ final class Settings: ObservableObject {
     @Published var meetingsFolder: String { didSet { d.set(meetingsFolder, forKey: "meetingsFolder") } }
     @Published var meetingAutoOffer: Bool { didSet { d.set(meetingAutoOffer, forKey: "meetingAutoOffer") } }
     @Published var meetingDiarise: Bool { didSet { d.set(meetingDiarise, forKey: "meetingDiarise") } }
+    /// Apple voice processing on the meeting microphone: cancels what the speakers play back into a desk mic.
+    @Published var meetingEchoCancel: Bool { didSet { d.set(meetingEchoCancel, forKey: "meetingEchoCancel") } }
     @Published var meetingCalendar: Bool { didSet { d.set(meetingCalendar, forKey: "meetingCalendar") } }
     @Published var meetingFollowUp: Bool { didSet { d.set(meetingFollowUp, forKey: "meetingFollowUp") } }
     @Published var meetingEngine: MeetingEngine { didSet { d.set(meetingEngine.rawValue, forKey: "meetingEngine") } }
@@ -177,6 +179,7 @@ final class Settings: ObservableObject {
         meetingsFolder = d.string(forKey: "meetingsFolder") ?? ""
         meetingAutoOffer = d.object(forKey: "meetingAutoOffer") as? Bool ?? true
         meetingDiarise = d.object(forKey: "meetingDiarise") as? Bool ?? true
+        meetingEchoCancel = d.object(forKey: "meetingEchoCancel") as? Bool ?? false
         meetingCalendar = d.object(forKey: "meetingCalendar") as? Bool ?? true
         meetingFollowUp = d.object(forKey: "meetingFollowUp") as? Bool ?? false
         meetingEngine = MeetingEngine(rawValue: d.string(forKey: "meetingEngine") ?? "") ?? .whisper

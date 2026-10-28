@@ -60,6 +60,8 @@ One native Swift binary, a 12 MB download, no Electron, no account, no subscript
 - **Scriptable.** `Speakhold --toggle` (or `open speakhold://toggle`) talks to the running app: `--start`, `--stop`, `--cancel`, `--settings`, `--history`. Wire it to SketchyBar, Raycast or a Shortcut.
 - **Native and tiny.** Swift + SwiftUI + AppKit. Menu-bar only. Launch at login. History window with one-click copy.
 
+If it replaces a subscription for you, a star on the repo helps the next person find it.
+
 ## Install
 
 **Download:** grab `Speakhold.app.zip` from the [latest release](https://github.com/sturzael/speakhold/releases/latest), unzip, drag to Applications.

@@ -142,8 +142,12 @@ actor Transcriber {
         "subtitles by the amara org community", "the end", "you", "bye", "okay", "so", "oh", "yeah", "yes", "hmm", "mm",
     ]
     static func looksHallucinated(_ text: String, noSpeech: Float, logProb: Float, compression: Float = 1) -> Bool {
-        // Whisper's own thresholds: a segment the decoder was this unsure of, or this repetitive, is noise.
-        if logProb < -1.0 || compression > 2.4 || (noSpeech > 0.6 && logProb < -0.5) { return true }
+        // A looping decoder ("thank you thank you thank you") compresses too well whatever its length.
+        if compression > 2.4 { return true }
+        // Whisper's confidence thresholds, applied to short lines only: hallucinations over silence are short,
+        // while a long line the decoder was unsure of is usually real speech badly heard, which the notes still need.
+        let words = text.split(separator: " ").count
+        if words < 8, logProb < -1.0 || (noSpeech > 0.6 && logProb < -0.5) { return true }
         // Sound-effect markers ("*sing*", "[Music]") and lines with no letters at all.
         let bare = text.replacingOccurrences(of: "\\*[^*]*\\*|\\[[^\\]]*\\]|\\([^)]*\\)", with: "", options: .regularExpression)
         let norm = bare.lowercased().unicodeScalars.map { CharacterSet.letters.contains($0) ? Character($0) : " " }

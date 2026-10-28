@@ -92,8 +92,12 @@ final class MeetingCapture {
         err = AudioDeviceStart(aggID, procID)
         guard err == noErr else { throw CaptureError.start(err) }
 
-        // 2. Microphone.
+        // 2. Microphone. Voice processing (opt-in) runs Apple's echo canceller against what the Mac is playing,
+        // for a desk mic next to speakers; it changes the input format, so it is set before the format is read.
         let input = engine.inputNode
+        if Settings.shared.meetingEchoCancel {
+            do { try input.setVoiceProcessingEnabled(true) } catch { NSLog("Speakhold: voice processing unavailable: %@", error.localizedDescription) }
+        }
         let micFormat = input.outputFormat(forBus: 0)
         micConverter = AVAudioConverter(from: micFormat, to: target)
         input.installTap(onBus: 0, bufferSize: 4096, format: micFormat) { [weak self] buf, _ in
