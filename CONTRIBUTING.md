@@ -57,12 +57,7 @@ security import h.p12 -k ~/Library/Keychains/login.keychain-db -P x -T /usr/bin/
 
 ## Roadmap / good first issues
 
-- Notarized builds + Homebrew cask
-- Parakeet (FluidAudio) as an alternative engine
-- Per-app style presets (casual in Slack, formal in Mail)
-- Streaming partial transcripts in the pill
-- Cloud transcription fallback (Deepgram / Groq) for long dictations
-- Localised UI
+The roadmap lives in the [issues](https://github.com/sturzael/speakhold/issues); the ones labelled **good first issue** are scoped to a single file or two and point at the code to start from. Done since this list was first written: the Homebrew cask, Parakeet for meetings, meeting recording with notes, Claude Code as a notes engine. Still open: notarised builds, per-app style presets, a local LLM engine, speaker names from the calendar, export templates, localisation, Intel, a cloud fallback for very long dictations.
 
 ## Style
 
