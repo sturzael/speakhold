@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Parakeet for dictation, and the default for English.** Settings → General → Engine. NVIDIA's Parakeet (via FluidAudio, the model meetings already use) transcribes a six-second dictation in 0.1 s against Whisper's 0.7 s, gives the same words, and returns nothing over music or silence where Whisper writes "Thank you". Whisper stays for other languages (Parakeet is English only, and any language other than `en` falls back to it automatically) and for people who want the dictionary in the decoder. One Parakeet instance is shared by dictation and meetings, so the model loads once. Meetings now default to Parakeet too.
+- **Headless engine comparison.** `Speakhold --transcribe clip.wav --whisper|--parakeet --no-cleanup` prints the engine, the decode time and the text.
 - **Easier install.** The download is now a disk image with a drag-to-Applications window (also attached to 0.2.2), there is a one-line Terminal installer (`curl -fsSL https://speakhold.wildinteractive.app/install.sh | sh`) that avoids the Gatekeeper dialog, and an install page with the macOS 15 "Open Anyway" steps.
 
 ## 0.2.2 — 2026-10-29

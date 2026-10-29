@@ -17,6 +17,15 @@ actor ParakeetMeetingTranscriber: MeetingTranscriber {
         status = "Ready"; progress?(status)
     }
 
+    /// One short clip (a dictation) to text. Parakeet wants at least a second; shorter clips are padded.
+    func text(_ samples: [Float]) async throws -> String {
+        try await prepare()
+        guard let manager else { return "" }
+        var audio = samples
+        if audio.count < 16_000 { audio.append(contentsOf: [Float](repeating: 0, count: 16_000 - audio.count)) }
+        return try await manager.transcribe(audio).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     func segments(_ samples: [Float], language: String, promptTerms: [String], progress: (@Sendable (Double) -> Void)?) async throws -> [Transcriber.Segment] {
         try await prepare()
         guard let manager else { return [] }

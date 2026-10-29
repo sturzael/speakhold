@@ -2,8 +2,14 @@ import Foundation
 import WhisperKit
 
 /// Wraps WhisperKit: downloads the model on first use, then transcribes 16 kHz float samples.
+/// With the Parakeet engine selected it hands dictations to the same Parakeet instance the meeting pipeline uses.
 actor Transcriber {
     enum State: Equatable { case idle, downloading(Double), loading, ready, failed(String) }
+
+    /// Shared with meetings so the ~600 MB model is loaded once. A `let` on an actor is readable from outside.
+    let parakeet = ParakeetMeetingTranscriber()
+    private(set) var engine: DictationEngine = .whisper
+    private var parakeetReady = false
 
     private var kit: WhisperKit?
     private var loadedModel: String?
@@ -13,8 +19,15 @@ actor Transcriber {
 
     private func set(_ s: State) { state = s; onState?(s) }
 
-    func prepare(model: String) async {
-        if kit != nil, loadedModel == model { return }
+    func prepare(model: String, engine: DictationEngine = .whisper) async {
+        self.engine = engine
+        if engine == .parakeet {
+            if parakeetReady { set(.ready); return }
+            set(.loading)
+            do { try await parakeet.prepare(); parakeetReady = true; set(.ready) } catch { set(.failed(error.localizedDescription)) }
+            return
+        }
+        if kit != nil, loadedModel == model { set(.ready); return }
         kit = nil
         set(.downloading(0))
         do {
@@ -58,9 +71,13 @@ actor Transcriber {
     private var dictating = 0
 
     func transcribe(_ samples: [Float], language: String, promptTerms: [String], fast: Bool = false) async throws -> String {
-        guard let kit else { throw NSError(domain: "Speakhold", code: 2, userInfo: [NSLocalizedDescriptionKey: "Model not loaded yet."]) }
         dictating += 1
         defer { dictating -= 1 }
+        if engine == .parakeet {
+            guard parakeetReady else { throw NSError(domain: "Speakhold", code: 2, userInfo: [NSLocalizedDescriptionKey: "Model not loaded yet."]) }
+            return Transcriber.tidy(try await parakeet.text(samples))
+        }
+        guard let kit else { throw NSError(domain: "Speakhold", code: 2, userInfo: [NSLocalizedDescriptionKey: "Model not loaded yet."]) }
         // Whisper needs at least ~1 s; pad very short clips with silence.
         var audio = samples
         if audio.count < 16_000 { audio.append(contentsOf: [Float](repeating: 0, count: 16_000 - audio.count)) }
@@ -200,7 +217,6 @@ actor Transcriber {
 
     /// Test hook: transcribe an audio file on disk (any format AVFoundation reads).
     func transcribeFile(_ path: String, language: String, promptTerms: [String]) async throws -> String {
-        guard let kit else { throw NSError(domain: "Speakhold", code: 2, userInfo: [NSLocalizedDescriptionKey: "Model not loaded yet."]) }
         let buffer = try AudioProcessor.loadAudio(fromPath: path)
         let samples = AudioProcessor.convertBufferToArray(buffer: buffer)
         return try await transcribe(samples, language: language, promptTerms: promptTerms)

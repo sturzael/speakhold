@@ -98,7 +98,8 @@ if let cmd = ["--toggle", "--start", "--stop", "--cancel", "--settings", "--hist
     exit(0)
 }
 
-// `Speakhold --transcribe file.wav [--no-cleanup]` runs the pipeline headless and prints the result.
+// `Speakhold --transcribe file.wav [--parakeet] [--no-cleanup]` runs the pipeline headless and prints the result
+// with the decode time, so the two engines can be compared on the same clip.
 if let i = args.firstIndex(of: "--transcribe"), i + 1 < args.count {
     let path = args[i + 1]
     let s = Settings.shared
@@ -106,9 +107,12 @@ if let i = args.firstIndex(of: "--transcribe"), i + 1 < args.count {
     let sem = DispatchSemaphore(value: 0)
     Task {
         await t.setStateHandler { st in print("model:", st) }
-        await t.prepare(model: s.model.rawValue)
+        let engine: DictationEngine = args.contains("--parakeet") ? .parakeet : (args.contains("--whisper") ? .whisper : s.effectiveDictationEngine)
+        await t.prepare(model: s.model.rawValue, engine: engine)
         do {
+            let t0 = Date()
             let raw = try await t.transcribeFile(path, language: s.language, promptTerms: s.dictionaryTerms)
+            print("ENGINE:", engine.rawValue, String(format: "%.2f s", Date().timeIntervalSince(t0)))
             print("RAW:", raw)
             if !args.contains("--no-cleanup") {
                 print("CLEAN (\(s.cleanupEngine.rawValue)):", await Polish.run(raw, settings: s, appName: "Test"))

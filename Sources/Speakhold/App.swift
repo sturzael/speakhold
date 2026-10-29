@@ -192,7 +192,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     private let meetingState = MeetingState()
     private var meetingWindow: NSWindow?
-    private var parakeet: Any?        // ParakeetMeetingTranscriber
     private var diarizer: Any?        // FluidMeetingDiarizer
     private var callTimer: Timer?
     private var offeredPIDs: Set<pid_t> = []
@@ -277,9 +276,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             }
             openMeetingWindow()
             // Warm the heavy models while the call runs so the end is quick.
-            if Settings.shared.meetingEngine == .parakeet {
-                let p = (parakeet as? ParakeetMeetingTranscriber) ?? ParakeetMeetingTranscriber()
-                parakeet = p
+            if Settings.shared.usesParakeetForMeetings {
+                let p = transcriber.parakeet   // one instance for dictation and meetings
                 Task { try? await p.prepare { [weak self] st in DispatchQueue.main.async { self?.meetingState.status = st == "Ready" ? "" : st } } }
             }
             if Settings.shared.meetingDiarise {
@@ -308,7 +306,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         session.title = meetingState.title.trimmingCharacters(in: .whitespaces).isEmpty ? session.title : meetingState.title
         session.userNotes = meetingState.notes
         let s = Settings.shared
-        let engine: MeetingTranscriber = (s.meetingEngine == .parakeet ? (parakeet as? ParakeetMeetingTranscriber) : nil) ?? WhisperMeetingTranscriber(transcriber: transcriber)
+        let engine: MeetingTranscriber = s.usesParakeetForMeetings ? transcriber.parakeet : WhisperMeetingTranscriber(transcriber: transcriber)
         let dia: MeetingDiarizer? = s.meetingDiarise ? ((diarizer as? FluidMeetingDiarizer) ?? FluidMeetingDiarizer()) : nil
 
         // The notes are written in the background: the pill goes back to normal, dictation keeps working, the
@@ -594,7 +592,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 }
             }
         }
-        await transcriber.prepare(model: model)
+        await transcriber.prepare(model: model, engine: Settings.shared.effectiveDictationEngine)
     }
 
     /// Settings → "Test microphone": records 3 s from the chosen device, shows the level and the raw transcript.

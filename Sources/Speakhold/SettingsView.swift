@@ -483,11 +483,18 @@ struct SettingsView: View {
                 }
             }
 
-            InkCard(title: "Speech model", note: "Runs on this Mac's Neural Engine. Your voice never leaves the machine.") {
-                InkRow(label: "Model", divider: false) {
-                    Picker("", selection: $settings.model) {
-                        ForEach(WhisperModel.allCases) { Text($0.label).tag($0) }
+            InkCard(title: "Speech model", note: "Runs on this Mac's Neural Engine. Your voice never leaves the machine. Whisper knows about 100 languages and reads your dictionary while decoding; Parakeet is several times faster, English only, and shares the model meetings use.") {
+                InkRow(label: "Engine", hint: settings.dictationEngine == .parakeet && settings.effectiveDictationEngine == .whisper ? "Parakeet is English only, so Whisper is used for \(settings.language)." : nil, divider: settings.dictationEngine == .whisper) {
+                    Picker("", selection: $settings.dictationEngine) {
+                        ForEach(DictationEngine.allCases) { Text($0.label).tag($0) }
                     }.labelsHidden().frame(width: 290)
+                }
+                if settings.dictationEngine == .whisper {
+                    InkRow(label: "Model", divider: false) {
+                        Picker("", selection: $settings.model) {
+                            ForEach(WhisperModel.allCases) { Text($0.label).tag($0) }
+                        }.labelsHidden().frame(width: 290)
+                    }
                 }
                 InkRow(label: "Status") {
                     StatusChip(text: status.modelStatus, color: modelColor)
@@ -575,7 +582,7 @@ struct SettingsView: View {
                     Toggle("", isOn: $settings.meetingCalendar).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
             }
-            InkCard(title: "Transcript", note: "Whisper is already loaded for dictation. Parakeet transcribes an hour in well under a minute and downloads about 600 MB on first use; English only.") {
+            InkCard(title: "Transcript", note: "Whisper is already loaded for dictation. Parakeet transcribes an hour in well under a minute and downloads about 600 MB on first use; English only. Whisper is slower but knows about 100 languages.") {
                 InkRow(label: "Transcribe meetings with", divider: false) {
                     Picker("", selection: $settings.meetingEngine) {
                         ForEach(MeetingEngine.allCases) { Text($0.label).tag($0) }

@@ -106,7 +106,16 @@ enum WhisperModel: String, CaseIterable, Identifiable {
 enum MeetingEngine: String, CaseIterable, Identifiable {
     case whisper, parakeet
     var id: String { rawValue }
-    var label: String { self == .whisper ? "Whisper (same model as dictation)" : "Parakeet (faster, English, ~600 MB extra)" }
+    var label: String { self == .whisper ? "Whisper (slower, any language)" : "Parakeet (fast, English only, ~600 MB)" }
+}
+
+/// Which model turns a dictation into text. Whisper takes the personal dictionary as a decoder prompt and knows
+/// ~100 languages; Parakeet (NVIDIA's English 0.6B model, via FluidAudio) is several times faster and does not
+/// invent "Thank you" over silence. English only; the dictionary is applied by the cleanup pass instead.
+enum DictationEngine: String, CaseIterable, Identifiable {
+    case whisper, parakeet
+    var id: String { rawValue }
+    var label: String { self == .whisper ? "Whisper (any language, dictionary in the decoder)" : "Parakeet (faster, English only)" }
 }
 
 final class Settings: ObservableObject {
@@ -144,6 +153,14 @@ final class Settings: ObservableObject {
     @Published var meetingCalendar: Bool { didSet { d.set(meetingCalendar, forKey: "meetingCalendar") } }
     @Published var meetingFollowUp: Bool { didSet { d.set(meetingFollowUp, forKey: "meetingFollowUp") } }
     @Published var meetingEngine: MeetingEngine { didSet { d.set(meetingEngine.rawValue, forKey: "meetingEngine") } }
+    @Published var dictationEngine: DictationEngine { didSet { d.set(dictationEngine.rawValue, forKey: "dictationEngine") } }
+    /// Parakeet is English only, so a language other than "en" (or auto) falls back to Whisper whatever the picker says.
+    var effectiveDictationEngine: DictationEngine {
+        let lang = language.trimmingCharacters(in: .whitespaces).lowercased()
+        return dictationEngine == .parakeet && (lang.isEmpty || lang == "en") ? .parakeet : .whisper
+    }
+    /// Whisper is only loaded when dictation uses it, so a Parakeet dictation setup transcribes meetings with Parakeet too.
+    var usesParakeetForMeetings: Bool { meetingEngine == .parakeet || effectiveDictationEngine == .parakeet }
     /// Keep an icon in the Dock (click it to open Settings; right-click for the menu). Off = menu-bar only.
     @Published var showInDock: Bool { didSet { d.set(showInDock, forKey: "showInDock") } }
 
@@ -182,7 +199,8 @@ final class Settings: ObservableObject {
         meetingEchoCancel = d.object(forKey: "meetingEchoCancel") as? Bool ?? false
         meetingCalendar = d.object(forKey: "meetingCalendar") as? Bool ?? true
         meetingFollowUp = d.object(forKey: "meetingFollowUp") as? Bool ?? false
-        meetingEngine = MeetingEngine(rawValue: d.string(forKey: "meetingEngine") ?? "") ?? .whisper
+        meetingEngine = MeetingEngine(rawValue: d.string(forKey: "meetingEngine") ?? "") ?? .parakeet
+        dictationEngine = DictationEngine(rawValue: d.string(forKey: "dictationEngine") ?? "") ?? .parakeet
     }
 
     /// Picks up ANTHROPIC_API_KEY from the environment on first launch so there is nothing to paste.
