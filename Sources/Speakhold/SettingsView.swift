@@ -582,7 +582,7 @@ struct SettingsView: View {
                     Toggle("", isOn: $settings.meetingCalendar).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
             }
-            InkCard(title: "Transcript", note: "Whisper is already loaded for dictation. Parakeet transcribes an hour in well under a minute and downloads about 600 MB on first use; English only. Whisper is slower but knows about 100 languages.") {
+            InkCard(title: "Transcript", note: "Parakeet is the same model dictation uses, loaded once: an hour of audio in well under a minute, English only, about 600 MB on first use. Whisper is slower but knows about 100 languages.") {
                 InkRow(label: "Transcribe meetings with", divider: false) {
                     Picker("", selection: $settings.meetingEngine) {
                         ForEach(MeetingEngine.allCases) { Text($0.label).tag($0) }

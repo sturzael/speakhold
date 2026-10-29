@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Meetings settings note no longer says Whisper is already loaded for dictation (Parakeet is the shared default since 0.2.3).
+
 ## 0.2.3 — 2026-10-30
 
 - **Parakeet for dictation, and the default for English.** Settings → General → Engine. NVIDIA's Parakeet (via FluidAudio, the model meetings already use) transcribes a six-second dictation in 0.1 s against Whisper's 0.7 s, gives the same words, and returns nothing over music or silence where Whisper writes "Thank you". Whisper stays for other languages (Parakeet is English only, and any language other than `en` falls back to it automatically) and for people who want the dictionary in the decoder. One Parakeet instance is shared by dictation and meetings, so the model loads once. Meetings now default to Parakeet too.

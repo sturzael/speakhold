@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="../site.css?v=20261029a">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Speakhold", "item": "https://speakhold.wildinteractive.app/"}, {"@type": "ListItem", "position": 2, "name": "Compared", "item": "https://speakhold.wildinteractive.app/#compared"}, {"@type": "ListItem", "position": 3, "name": "Speakhold vs Superwhisper", "item": "https://speakhold.wildinteractive.app/vs/superwhisper.html"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is the accuracy the same?", "acceptedAnswer": {"@type": "Answer", "text": "Same model family. Speakhold defaults to Whisper Large v3 Turbo on the Neural Engine; you can pick Large v3 for accuracy or Base for speed."}}, {"@type": "Question", "name": "Can I use a local LLM for cleanup?", "acceptedAnswer": {"@type": "Answer", "text": "On macOS 26 Speakhold uses Apple Intelligence on-device. There is no Ollama hookup yet; it is on the roadmap in CONTRIBUTING."}}, {"@type": "Question", "name": "Does it handle meetings?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. \"Record meeting\" captures both sides of a Zoom, Meet or Teams call without a bot and stops itself when the call app lets go of the microphone."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is the accuracy the same?", "acceptedAnswer": {"@type": "Answer", "text": "Same model families. Speakhold defaults to Parakeet on the Neural Engine for English (faster, and silent over music where Whisper writes Thank you); switch to Whisper Large v3 Turbo, Large v3, Distil or Base for other languages or dictionary-in-the-decoder."}}, {"@type": "Question", "name": "Can I use a local LLM for cleanup?", "acceptedAnswer": {"@type": "Answer", "text": "On macOS 26 Speakhold uses Apple Intelligence on-device. There is no Ollama hookup yet; it is on the roadmap in CONTRIBUTING."}}, {"@type": "Question", "name": "Does it handle meetings?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. \"Record meeting\" captures both sides of a Zoom, Meet or Teams call without a bot and stops itself when the call app lets go of the microphone."}}]}</script>
 </head>
 <body>
 <header class="nav" aria-label="Site">
@@ -42,14 +42,14 @@
 <tr><td>Hotkey</td><td>Any chord, left/right-specific</td><td>Partial</td></tr>
 <tr><td>Cleanup without a key</td><td class="yes">Yes, Apple Intelligence on-device</td><td>Yes, local models</td></tr>
 <tr><td>Records calls and writes notes</td><td class="yes">Yes, both sides, no bot, notes in the background</td><td>Meeting mode</td></tr>
-<tr><td>Model choice</td><td>Whisper Large v3 Turbo, Large v3, Distil, Base; Parakeet for meetings</td><td>Many, including cloud</td></tr>
+<tr><td>Model choice</td><td>Parakeet (default for English, shared with meetings); Whisper Large v3 Turbo, Large v3, Distil, Base</td><td>Many, including cloud</td></tr>
 <tr><td>Modes and templates</td><td>Dictionary, style notes, text replacements</td><td>Extensive mode system</td></tr>
 </table><p class="small">As of October 2026. Corrections welcome via pull request.</p>
 <h2>Why people switch</h2>
 <p>Superwhisper is a good product and charges for it. Speakhold is free and you can read every line that touches your microphone. For meetings, Speakhold records your mic and what the Mac is playing as two streams, so you and the other side are labelled, and it writes the notes in the background after you stop, through Claude Code on your Mac, your own Claude key, or Apple Intelligence.</p>
 <h2>Why you might stay with Superwhisper</h2>
 <p>Superwhisper's mode system is deeper: per-app prompts, templates, more model choice, more languages tested. If you have built workflows on that, Speakhold's single dictionary and style box will feel thin. It also has a longer track record and paid support.</p>
-<div class="faq"><h3>Is the accuracy the same?</h3><p>Same model family. Speakhold defaults to Whisper Large v3 Turbo on the Neural Engine; you can pick Large v3 for accuracy or Base for speed.</p><h3>Can I use a local LLM for cleanup?</h3><p>On macOS 26 Speakhold uses Apple Intelligence on-device. There is no Ollama hookup yet; it is on the roadmap in CONTRIBUTING.</p><h3>Does it handle meetings?</h3><p>Yes. "Record meeting" captures both sides of a Zoom, Meet or Teams call without a bot and stops itself when the call app lets go of the microphone.</p></div>
+<div class="faq"><h3>Is the accuracy the same?</h3><p>Same model families. Speakhold defaults to Parakeet on the Neural Engine for English (faster, and silent over music where Whisper writes Thank you); switch to Whisper Large v3 Turbo, Large v3, Distil or Base for other languages or dictionary-in-the-decoder.</p><h3>Can I use a local LLM for cleanup?</h3><p>On macOS 26 Speakhold uses Apple Intelligence on-device. There is no Ollama hookup yet; it is on the roadmap in CONTRIBUTING.</p><h3>Does it handle meetings?</h3><p>Yes. "Record meeting" captures both sides of a Zoom, Meet or Teams call without a bot and stops itself when the call app lets go of the microphone.</p></div>
   <h2>Try it</h2>
   <div class="cta"><a class="btn primary" href="https://github.com/sturzael/speakhold/releases/latest/download/Speakhold.dmg">Download Speakhold for Mac</a><a class="btn ghost" href="https://github.com/sturzael/speakhold">Source on GitHub</a></div>
 <p class="small">Free · MIT · macOS 14+ · Apple Silicon · <code>brew install --cask sturzael/tap/speakhold</code></p>
@@ -72,7 +72,7 @@
           <li><a href="../privacy.html">Privacy</a></li>
           <li><a href="../terms.html">Terms</a></li>
         </ul>
-        <p class="credit">Built on <a href="https://github.com/argmaxinc/WhisperKit">WhisperKit</a> · Made in Wellington, New Zealand by <a href="https://wildinteractive.co.nz">Wild Interactive</a> · MIT · 2026</p>
+        <p class="credit">Built on <a href="https://github.com/FluidInference/FluidAudio">FluidAudio</a> and <a href="https://github.com/argmaxinc/WhisperKit">WhisperKit</a> · Made in Wellington, New Zealand by <a href="https://wildinteractive.co.nz">Wild Interactive</a> · MIT · 2026</p>
       </nav>
     </div>
     <div class="mark" aria-hidden="true"><span>speakhold</span></div>
