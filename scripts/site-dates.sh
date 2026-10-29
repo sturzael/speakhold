@@ -20,6 +20,7 @@ while IFS= read -r line; do
 done < docs/sitemap.xml > "$tmp" && mv "$tmp" docs/sitemap.xml
 sed -i '' "s|· MIT · 2026</p>|· MIT · v$ver · updated $human</p>|; s|· MIT · v[0-9.]* · updated [^<]*</p>|· MIT · v$ver · updated $human</p>|" docs/index.html
 sed -i '' "s|no account · v[0-9.]*|no account · v$ver|; s|softwareVersion\": \"[0-9.]*\"|softwareVersion\": \"$ver\"|" docs/index.html
+sed -i '' "s|Apple Silicon · v[0-9.]*</p>|Apple Silicon · v$ver</p>|" docs/index.html
 grep -q '^Last updated:' docs/llms.txt \
   && sed -i '' "s|^Last updated:.*|Last updated: $today (v$ver)|" docs/llms.txt \
   || sed -i '' "3a\\
