@@ -26,7 +26,7 @@ PY
 git add README.md README-zh.md README-ja.md README-ko.md
 git commit -q -m "Add Speakhold to Audio Record and Process"
 git push -q -u origin add-speakhold
-gh pr create --repo jaywcjlove/awesome-mac --title "Add Speakhold (open-source dictation + bot-free meeting notes, on-device)" --body "Adds Speakhold to **Audio Record and Process** in all four READMEs, alphabetically after Shiyin.
+gh pr create --repo jaywcjlove/awesome-mac --head sturzael:add-speakhold --title "Add Speakhold (open-source dictation + bot-free meeting notes, on-device)" --body "Adds Speakhold to **Audio Record and Process** in all four READMEs, alphabetically after Shiyin.
 
 - Site: https://speakhold.wildinteractive.app/
 - Source: https://github.com/sturzael/speakhold (MIT, native Swift, macOS 14+, Apple Silicon)
