@@ -98,7 +98,7 @@ if let cmd = ["--toggle", "--start", "--stop", "--cancel", "--settings", "--hist
     exit(0)
 }
 
-// `Speakhold --transcribe file.wav [--parakeet|--whisper] [--dictionary "a, b"] [--no-cleanup]` runs the pipeline headless and prints the result
+// `Speakhold --transcribe file.wav [--parakeet|--whisper|--apple] [--dictionary "a, b"] [--no-cleanup]` runs the pipeline headless and prints the result
 // with the decode time, so the two engines can be compared on the same clip.
 if let i = args.firstIndex(of: "--transcribe"), i + 1 < args.count {
     let path = args[i + 1]
@@ -107,11 +107,11 @@ if let i = args.firstIndex(of: "--transcribe"), i + 1 < args.count {
     let sem = DispatchSemaphore(value: 0)
     Task {
         await t.setStateHandler { st in print("model:", st) }
-        let engine: DictationEngine = args.contains("--parakeet") ? .parakeet : (args.contains("--whisper") ? .whisper : s.effectiveDictationEngine)
+        let engine: DictationEngine = args.contains("--parakeet") ? .parakeet : (args.contains("--whisper") ? .whisper : (args.contains("--apple") ? .apple : s.effectiveDictationEngine))
         // `--dictionary "HubSpot, Smriti"` overrides the saved dictionary for this run (comma-separated).
         let terms = args.firstIndex(of: "--dictionary").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
             .map { $0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } } ?? s.dictionaryTerms
-        await t.prepare(model: s.model.rawValue, engine: engine, dictionary: terms)
+        await t.prepare(model: s.model.rawValue, engine: engine, dictionary: terms, language: s.language)
         do {
             let t0 = Date()
             let raw = try await t.transcribeFile(path, language: s.language, promptTerms: terms)
@@ -127,15 +127,18 @@ if let i = args.firstIndex(of: "--transcribe"), i + 1 < args.count {
     exit(0)
 }
 
-// `Speakhold --polish "raw text"` runs the polish pipeline (spoken commands → model → replacements) on a string.
+// `Speakhold --polish "raw text" [--app Slack]` runs the polish pipeline (spoken commands → model → replacements) on a string.
 if let i = args.firstIndex(of: "--polish"), i + 1 < args.count {
     let s = Settings.shared
     let sem = DispatchSemaphore(value: 0)
     Task {
         print("engine:", s.cleanupEngine.rawValue, "apple available:", Polish.appleAvailable)
         print("commands:", SpokenCommands.apply(args[i + 1]))
+        let appForStyle = args.firstIndex(of: "--app").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
+        print("style:", s.style(for: appForStyle).replacingOccurrences(of: "\n", with: " | "))
         let t = Date()
-        print("polished:", await Polish.run(args[i + 1], settings: s, appName: "Test"), String(format: "(%.2fs)", Date().timeIntervalSince(t)))
+        let app = args.firstIndex(of: "--app").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil } ?? "Test"
+        print("polished:", await Polish.run(args[i + 1], settings: s, appName: app), String(format: "(%.2fs)", Date().timeIntervalSince(t)))
         sem.signal()
     }
     sem.wait()
@@ -175,7 +178,7 @@ if let i = args.firstIndex(of: "--record-meeting"), i + 2 < args.count {
     exit(0)
 }
 
-// `Speakhold --meeting-from-files me.wav them.wav` runs the meeting pipeline (segments → merge → notes → markdown)
+// `Speakhold --meeting-from-files me.wav them.wav [--attendees "A, B"]` runs the meeting pipeline (segments → merge → notes → markdown)
 // on two recordings, for testing without a call.
 if let i = args.firstIndex(of: "--meeting-from-files"), i + 2 < args.count {
     guard #available(macOS 14.2, *) else { exit(1) }
@@ -189,6 +192,7 @@ if let i = args.firstIndex(of: "--meeting-from-files"), i + 2 < args.count {
         session.capture.load(micPath: args[i + 1], systemPath: args[i + 2])
         if args.contains("--marks") { session.marks = [5, 12] }
         if let n = args.firstIndex(of: "--notes"), n + 1 < args.count { session.userNotes = args[n + 1] }
+        if let a = args.firstIndex(of: "--attendees"), a + 1 < args.count { session.attendees = args[a + 1].split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
         let engine: MeetingTranscriber = args.contains("--parakeet") ? ParakeetMeetingTranscriber() : WhisperMeetingTranscriber(transcriber: t)
         let dia: MeetingDiarizer? = args.contains("--diarise") ? FluidMeetingDiarizer() : nil
         do {

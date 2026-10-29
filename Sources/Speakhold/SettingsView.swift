@@ -381,6 +381,9 @@ struct SettingsView: View {
                         ForEach(PillPosition.allCases) { Text($0.label).tag($0) }
                     }.labelsHidden().frame(width: 230)
                 }
+                InkRow(label: "Show words while you talk", hint: "The pill widens with the last few words as you speak (Parakeet decodes the preview in well under a second). Off keeps it a short bar.") {
+                    Toggle("", isOn: $settings.livePreview).toggleStyle(InkToggleStyle()).labelsHidden()
+                }
                 InkRow(label: "Keep a small tab on screen while idle") {
                     Toggle("", isOn: $settings.showIdlePill).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
@@ -486,7 +489,7 @@ struct SettingsView: View {
             InkCard(title: "Speech model", note: "Runs on this Mac's Neural Engine. Your voice never leaves the machine. Whisper knows about 100 languages and reads your dictionary while decoding; Parakeet is several times faster, English only, and shares the model meetings use.") {
                 InkRow(label: "Engine", hint: settings.dictationEngine == .parakeet && settings.effectiveDictationEngine == .whisper ? "Parakeet is English only, so Whisper is used for \(settings.language)." : nil, divider: settings.dictationEngine == .whisper) {
                     Picker("", selection: $settings.dictationEngine) {
-                        ForEach(DictationEngine.allCases) { Text($0.label).tag($0) }
+                        ForEach(DictationEngine.offered) { Text($0.label).tag($0) }
                     }.labelsHidden().frame(width: 290)
                 }
                 if settings.dictationEngine == .whisper {
@@ -554,14 +557,28 @@ struct SettingsView: View {
                     InkField(placeholder: "claude-haiku-5-5", text: $settings.cleanupModel, width: 220)
                 }
             }
+            if settings.cleanupEngine == .ollama {
+                InkCard(title: "Local model", note: "Ollama, or any server with its /api/chat shape. Polishes dictation, and writes meeting notes when no Claude path is set. Nothing leaves the Mac unless the URL points off it. Pull a model first: ollama pull llama3.2.") {
+                    InkRow(label: "Server") {
+                        InkField(placeholder: "http://127.0.0.1:11434", text: $settings.ollamaURL, width: 260)
+                    }
+                    InkRow(label: "Model", divider: false) {
+                        InkField(placeholder: "llama3.2", text: $settings.ollamaModel, width: 220)
+                    }
+                }
+            }
             InkCard(title: "Dictionary", note: "Names and terms to spell exactly. One per line. These prime the speech model and the polish pass.") {
                 InkBlock(divider: false) { InkEditor(text: $settings.dictionary, mono: true, minHeight: 100) }
             }
             InkCard(title: "Replacements", note: "One per line, spoken -> written. Whole phrase, any case. Runs last, with or without polish.\nmy email -> you@example.com\nwild interactive -> Wild Interactive") {
                 InkBlock(divider: false) { InkEditor(text: $settings.replacements, mono: true, minHeight: 80) }
             }
-            InkCard(title: "Style notes", note: "Optional. How you like things written: “keep it casual”, “never use semicolons”. Applies to either polish engine.") {
+            InkCard(title: "Style notes", note: "Optional. How you like things written: “keep it casual”, “never use semicolons”. Applies to every polish engine.") {
                 InkBlock(divider: false) { InkEditor(text: $settings.styleNotes, minHeight: 70) }
+            }
+
+            InkCard(title: "Style by app", note: "One line per app, “App: how to write”. Matched on the name of the app you dictate into and added to the style notes for that paste. Slack: casual, short, no sign-off. Mail: formal, full sentences. Terminal: no punctuation at the end.") {
+                InkBlock(divider: false) { InkEditor(text: $settings.styleByApp, mono: true, minHeight: 70) }
             }
 
             InkCard(title: "Send after pasting", note: "Apps where a dictation is the whole message: Return is pressed right after the text lands, so Claude Code, Slack or a terminal sends it without you reaching for the key. One per line, app name or bundle id (Terminal, Slack, com.apple.Terminal). Empty means never.") {
@@ -620,6 +637,17 @@ struct SettingsView: View {
                 }
                 InkRow(label: "Draft a follow-up email too") {
                     Toggle("", isOn: $settings.meetingFollowUp).toggleStyle(InkToggleStyle()).labelsHidden()
+                }
+                InkRow(label: "File name", hint: "Tokens: {title} {calendar} {date} {time} {month}. Example: {date} {title}") {
+                    InkField(placeholder: "{title}", text: $settings.notesFilenameTemplate, width: 220)
+                }
+                InkRow(label: "Folders") {
+                    Picker("", selection: $settings.notesFolderRule) {
+                        ForEach(NotesFolderRule.allCases) { Text($0.label).tag($0) }
+                    }.labelsHidden().frame(width: 260)
+                }
+                InkRow(label: "YAML front matter", hint: "title, date, length, attendees and tags at the top of the file, for Obsidian and other note apps.") {
+                    Toggle("", isOn: $settings.notesFrontMatter).toggleStyle(InkToggleStyle()).labelsHidden()
                 }
                 InkRow(label: "Save notes to", hint: settings.meetingsFolder.isEmpty ? "~/Documents/Speakhold Meetings (Finder: Meeting notes folder in the menu)" : settings.meetingsFolder) {
                     HStack(spacing: 8) {

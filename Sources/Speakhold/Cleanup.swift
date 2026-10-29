@@ -5,13 +5,14 @@ import FoundationModels
 
 /// Which model, if any, tidies the raw transcript before it is pasted.
 enum CleanupEngine: String, CaseIterable, Identifiable {
-    case off, apple, claude
+    case off, apple, claude, ollama
     var id: String { rawValue }
     var label: String {
         switch self {
         case .off: return "Off (raw transcript)"
         case .apple: return "Apple Intelligence (on this Mac)"
         case .claude: return "Claude (your API key)"
+        case .ollama: return "Local model (Ollama)"
         }
     }
 }
@@ -32,12 +33,14 @@ enum Polish {
         case .off: return false
         case .apple: return appleAvailable
         case .claude: return !s.anthropicKey.isEmpty
+        case .ollama: return !s.ollamaModel.isEmpty
         }
     }
 
     static func run(_ raw: String, settings s: Settings, appName: String?) async -> String {
         let prepped = SpokenCommands.apply(raw)
         var out = prepped
+        let style = s.style(for: appName)   // global style notes plus the per-app line, if any (#2)
         switch s.cleanupEngine {
         case .off:
             break
@@ -50,7 +53,7 @@ enum Polish {
                 for para in prepped.components(separatedBy: "\n\n") {
                     let trimmed = para.trimmingCharacters(in: .whitespacesAndNewlines)
                     guard !trimmed.isEmpty else { continue }
-                    parts.append(await engine.clean(trimmed, dictionary: s.dictionaryTerms, style: s.styleNotes) ?? trimmed)
+                    parts.append(await engine.clean(trimmed, dictionary: s.dictionaryTerms, style: style) ?? trimmed)
                 }
                 out = parts.joined(separator: "\n\n")
             }
@@ -58,7 +61,13 @@ enum Polish {
         case .claude:
             if !s.anthropicKey.isEmpty {
                 out = await Cleanup(apiKey: s.anthropicKey, model: s.cleanupModel)
-                    .clean(prepped, dictionary: s.dictionaryTerms, style: s.styleNotes, appName: appName)
+                    .clean(prepped, dictionary: s.dictionaryTerms, style: style, appName: appName)
+            }
+        case .ollama:
+            if !s.ollamaModel.isEmpty {
+                let system = PolishBrief.instructions(dictionary: s.dictionaryTerms, style: style, appName: appName)
+                if let cleaned = await OllamaClient(baseURL: s.ollamaURL, model: s.ollamaModel).complete(system: system, user: prepped),
+                   PolishBrief.plausible(cleaned, for: prepped) { out = cleaned }
             }
         }
         return Replacements.apply(out, rules: Replacements.parse(s.replacements))
@@ -278,6 +287,52 @@ struct ClaudeClient {
             return out.isEmpty ? nil : out
         } catch {
             NSLog("Speakhold Claude request failed: %@", error.localizedDescription)
+            return nil
+        }
+    }
+}
+
+/// Ollama, or any server speaking its /api/chat shape, on this Mac or the LAN (#3). Nothing leaves the machine
+/// unless the URL points off it. A <think>…</think> block (reasoning models) is stripped from the answer.
+struct OllamaClient {
+    let baseURL: String
+    let model: String
+
+    func complete(system: String, user: String, timeout: TimeInterval = 60) async -> String? {
+        guard !model.isEmpty, !user.isEmpty else { return nil }
+        let base = baseURL.trimmingCharacters(in: .whitespaces).isEmpty ? "http://127.0.0.1:11434" : baseURL.trimmingCharacters(in: .whitespaces)
+        guard let url = URL(string: base.hasSuffix("/") ? base + "api/chat" : base + "/api/chat") else { return nil }
+        let body: [String: Any] = [
+            "model": model, "stream": false,
+            "messages": [["role": "system", "content": system], ["role": "user", "content": user]],
+            "options": ["temperature": 0.2]
+        ]
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.timeoutInterval = timeout
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        do {
+            let (data, resp) = try await URLSession.shared.data(for: req)
+            guard let http = resp as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                NSLog("Speakhold Ollama HTTP error: %@", String(data: data, encoding: .utf8) ?? "")
+                return nil
+            }
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let message = json["message"] as? [String: Any], var text = message["content"] as? String else { return nil }
+            text = text.replacingOccurrences(of: "<think>[\\s\\S]*?</think>", with: "", options: .regularExpression)
+            var out = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            // Small local models preface ("Here's the cleaned transcript:") and quote; drop both.
+            var lines = out.components(separatedBy: "\n")
+            if lines.count > 1, let first = lines.first?.trimmingCharacters(in: .whitespaces), first.hasSuffix(":"), first.split(separator: " ").count <= 8 {
+                lines.removeFirst(); out = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+            if out.count > 2, (out.hasPrefix("\"") && out.hasSuffix("\"")) || (out.hasPrefix("“") && out.hasSuffix("”")) {
+                out = String(out.dropFirst().dropLast()).trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+            return out.isEmpty ? nil : out
+        } catch {
+            NSLog("Speakhold Ollama request failed: %@", error.localizedDescription)
             return nil
         }
     }

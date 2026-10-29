@@ -103,6 +103,19 @@ enum WhisperModel: String, CaseIterable, Identifiable {
     }
 }
 
+/// Where a meeting file lands under the notes folder (#5).
+enum NotesFolderRule: String, CaseIterable, Identifiable {
+    case flat, byTitle, byMonth
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .flat: return "One folder"
+        case .byTitle: return "A folder per meeting title"
+        case .byMonth: return "A folder per month (2026-10)"
+        }
+    }
+}
+
 enum MeetingEngine: String, CaseIterable, Identifiable {
     case whisper, parakeet
     var id: String { rawValue }
@@ -113,9 +126,17 @@ enum MeetingEngine: String, CaseIterable, Identifiable {
 /// ~100 languages; Parakeet (NVIDIA's English 0.6B model, via FluidAudio) is several times faster and does not
 /// invent "Thank you" over silence. English only; the dictionary is applied by the cleanup pass instead.
 enum DictationEngine: String, CaseIterable, Identifiable {
-    case whisper, parakeet
+    case whisper, parakeet, apple
     var id: String { rawValue }
-    var label: String { self == .whisper ? "Whisper (any language, dictionary in the decoder)" : "Parakeet (faster, English only)" }
+    var label: String {
+        switch self {
+        case .whisper: return "Whisper (any language, dictionary in the decoder)"
+        case .parakeet: return "Parakeet (faster, English only)"
+        case .apple: return "Apple (macOS 26, no download)"
+        }
+    }
+    /// The engines this Mac can run.
+    static var offered: [DictationEngine] { AppleSpeech.available ? allCases : [.whisper, .parakeet] }
 }
 
 final class Settings: ObservableObject {
@@ -140,6 +161,15 @@ final class Settings: ObservableObject {
     /// Apps where a dictation is sent as soon as it lands: Return is pressed after the paste. One per line, app name
     /// or bundle id, case-insensitive. Empty by default (#11).
     @Published var returnAfterPasteApps: String { didSet { d.set(returnAfterPasteApps, forKey: "returnAfterPasteApps") } }
+    /// Per-app style lines, "App: how to write" one per line (#2): "Slack: casual, short" / "Mail: formal, full sentences".
+    @Published var styleByApp: String { didSet { d.set(styleByApp, forKey: "styleByApp") } }
+    /// Local model server for polish and notes (#3).
+    @Published var ollamaURL: String { didSet { d.set(ollamaURL, forKey: "ollamaURL") } }
+    @Published var ollamaModel: String { didSet { d.set(ollamaModel, forKey: "ollamaModel") } }
+    /// Meeting file naming and placement (#5). Tokens: {title} {date} {time} {calendar} {month}.
+    @Published var notesFilenameTemplate: String { didSet { d.set(notesFilenameTemplate, forKey: "notesFilenameTemplate") } }
+    @Published var notesFolderRule: NotesFolderRule { didSet { d.set(notesFolderRule.rawValue, forKey: "notesFolderRule") } }
+    @Published var notesFrontMatter: Bool { didSet { d.set(notesFrontMatter, forKey: "notesFrontMatter") } }
     @Published var playSounds: Bool { didSet { d.set(playSounds, forKey: "playSounds") } }
     @Published var language: String { didSet { d.set(language, forKey: "language") } }
     @Published var inputDeviceUID: String { didSet { d.set(inputDeviceUID, forKey: "inputDeviceUID") } }
@@ -160,7 +190,11 @@ final class Settings: ObservableObject {
     /// Parakeet is English only, so a language other than "en" (or auto) falls back to Whisper whatever the picker says.
     var effectiveDictationEngine: DictationEngine {
         let lang = language.trimmingCharacters(in: .whitespaces).lowercased()
-        return dictationEngine == .parakeet && (lang.isEmpty || lang == "en") ? .parakeet : .whisper
+        switch dictationEngine {
+        case .parakeet: return (lang.isEmpty || lang == "en") ? .parakeet : .whisper
+        case .apple: return AppleSpeech.available ? .apple : .whisper
+        case .whisper: return .whisper
+        }
     }
     /// Whisper is only loaded when dictation uses it, so a Parakeet dictation setup transcribes meetings with Parakeet too.
     var usesParakeetForMeetings: Bool { meetingEngine == .parakeet || effectiveDictationEngine == .parakeet }
@@ -190,6 +224,12 @@ final class Settings: ObservableObject {
         dictionary = d.string(forKey: "dictionary") ?? ""
         styleNotes = d.string(forKey: "styleNotes") ?? ""
         returnAfterPasteApps = d.string(forKey: "returnAfterPasteApps") ?? ""
+        styleByApp = d.string(forKey: "styleByApp") ?? ""
+        ollamaURL = d.string(forKey: "ollamaURL") ?? "http://127.0.0.1:11434"
+        ollamaModel = d.string(forKey: "ollamaModel") ?? "llama3.2"
+        notesFilenameTemplate = d.string(forKey: "notesFilenameTemplate") ?? "{title}"
+        notesFolderRule = NotesFolderRule(rawValue: d.string(forKey: "notesFolderRule") ?? "") ?? .flat
+        notesFrontMatter = d.bool(forKey: "notesFrontMatter")
         playSounds = d.object(forKey: "playSounds") as? Bool ?? true
         language = d.string(forKey: "language") ?? "en"
         inputDeviceUID = d.string(forKey: "inputDeviceUID") ?? ""
@@ -211,6 +251,22 @@ final class Settings: ObservableObject {
     static func keyFromEnvironment() -> String {
         let v = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"] ?? ""
         return v.hasPrefix("sk-ant-api") ? v : ""
+    }
+
+    /// Global style notes plus the line for this app from `styleByApp`, matched on the app name (case-insensitive prefix).
+    func style(for appName: String?) -> String {
+        var out = styleNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let appName, !appName.isEmpty else { return out }
+        let lower = appName.lowercased()
+        for line in styleByApp.split(separator: "\n") {
+            guard let colon = line.firstIndex(of: ":") else { continue }
+            let app = line[..<colon].trimmingCharacters(in: .whitespaces).lowercased()
+            let rule = line[line.index(after: colon)...].trimmingCharacters(in: .whitespaces)
+            guard !app.isEmpty, !rule.isEmpty, lower == app || lower.hasPrefix(app) else { continue }
+            out += (out.isEmpty ? "" : "\n") + "In \(appName): " + rule
+            break
+        }
+        return out
     }
 
     /// True when the frontmost app (by localised name or bundle id) is on the Return-after-paste list.

@@ -593,7 +593,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 }
             }
         }
-        await transcriber.prepare(model: model, engine: Settings.shared.effectiveDictationEngine, dictionary: Settings.shared.dictionaryTerms)
+        await transcriber.prepare(model: model, engine: Settings.shared.effectiveDictationEngine, dictionary: Settings.shared.dictionaryTerms, language: Settings.shared.language)
     }
 
     /// Settings → "Test microphone": records 3 s from the chosen device, shows the level and the raw transcript.

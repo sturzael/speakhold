@@ -10,6 +10,8 @@ actor Transcriber {
     let parakeet = ParakeetMeetingTranscriber()
     private(set) var engine: DictationEngine = .whisper
     private var parakeetReady = false
+    private var apple: Any?   // AppleSpeechTranscriber on macOS 26
+    private var appleLanguage = ""
 
     private var kit: WhisperKit?
     private var loadedModel: String?
@@ -19,8 +21,20 @@ actor Transcriber {
 
     private func set(_ s: State) { state = s; onState?(s) }
 
-    func prepare(model: String, engine: DictationEngine = .whisper, dictionary: [String] = []) async {
+    func prepare(model: String, engine: DictationEngine = .whisper, dictionary: [String] = [], language: String = "en") async {
         self.engine = engine
+        if engine == .apple {
+            #if canImport(Speech)
+            if #available(macOS 26.0, *) {
+                let a = (apple as? AppleSpeechTranscriber) ?? AppleSpeechTranscriber()
+                apple = a
+                set(.loading)
+                do { try await a.prepare(language: language); appleLanguage = language; set(.ready) } catch { set(.failed(error.localizedDescription)) }
+                return
+            }
+            #endif
+            set(.failed("Apple speech needs macOS 26.")); return
+        }
         if engine == .parakeet {
             if !parakeetReady {
                 set(.loading)
@@ -81,6 +95,14 @@ actor Transcriber {
         if engine == .parakeet {
             guard parakeetReady else { throw NSError(domain: "Speakhold", code: 2, userInfo: [NSLocalizedDescriptionKey: "Model not loaded yet."]) }
             return Transcriber.tidy(try await parakeet.text(samples))
+        }
+        if engine == .apple {
+            #if canImport(Speech)
+            if #available(macOS 26.0, *), let a = apple as? AppleSpeechTranscriber {
+                return Transcriber.tidy(try await a.text(samples, language: language))
+            }
+            #endif
+            throw NSError(domain: "Speakhold", code: 2, userInfo: [NSLocalizedDescriptionKey: "Apple speech is not available."])
         }
         guard let kit else { throw NSError(domain: "Speakhold", code: 2, userInfo: [NSLocalizedDescriptionKey: "Model not loaded yet."]) }
         // Whisper needs at least ~1 s; pad very short clips with silence.

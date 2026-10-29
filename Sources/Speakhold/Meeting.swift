@@ -161,6 +161,13 @@ final class MeetingSession {
         }
 
         var lines = mine.map { Line(time: $0.start, speaker: me, text: $0.text) } + theirs.map { Line(time: $0.start, speaker: label($0), text: $0.text) }
+        // One other invitee and one voice on the far side: that voice is them, by name (#4). More than one on
+        // either count stays Speaker 1, 2, 3 with the invite list in the header for renaming.
+        let others = attendees.filter { !$0.lowercased().hasPrefix(me.lowercased()) }
+        let farName: String? = (others.count == 1 && order.count <= 1) ? others[0] : nil
+        if let farName {
+            for i in lines.indices where lines[i].speaker == "Them" || lines[i].speaker == "Speaker 1" { lines[i].speaker = farName }
+        }
         lines.sort { $0.time < $1.time }
         let merged = Self.merge(lines)
         let transcript = merged.map { "**\($0.speaker)** (\(Self.stamp($0.time))): \($0.text)" }.joined(separator: "\n\n")
@@ -184,13 +191,22 @@ final class MeetingSession {
 
         let df = DateFormatter(); df.dateFormat = "EEEE d MMMM yyyy, HH:mm"
         var speakers = "\(me) (microphone)"
-        speakers += order.isEmpty ? ", Them (the call)" : ", " + order.indices.map { "Speaker \($0 + 1)" }.joined(separator: ", ") + " (the call)"
-        var md = "# \(title)\n\n"
+        if let farName { speakers += ", \(farName) (the call, from the invite)" }
+        else { speakers += order.isEmpty ? ", Them (the call)" : ", " + order.indices.map { "Speaker \($0 + 1)" }.joined(separator: ", ") + " (the call)" }
+        var md = ""
+        if settings.notesFrontMatter {
+            let iso = ISO8601DateFormatter(); iso.formatOptions = [.withInternetDateTime]
+            let yamlTitle = title.replacingOccurrences(of: "\"", with: "'")
+            md += "---\ntitle: \"\(yamlTitle)\"\ndate: \(iso.string(from: started))\nlength: \"\(Self.stamp(duration))\"\n"
+            if !attendees.isEmpty { md += "attendees: [" + attendees.map { "\"\($0.replacingOccurrences(of: "\"", with: "'"))\"" }.joined(separator: ", ") + "]\n" }
+            md += "tags: [meeting, speakhold]\n---\n\n"
+        }
+        md += "# \(title)\n\n"
         md += "- **When:** \(df.string(from: started))\n- **Length:** \(Self.stamp(duration))\n"
         if let calendarTitle, !calendarTitle.isEmpty { md += "- **Calendar event:** \(calendarTitle)\n" }
         if !attendees.isEmpty { md += "- **Invited:** \(attendees.joined(separator: ", "))\n" }
         md += "- **Speakers:** \(speakers)"
-        if !order.isEmpty { md += ". Speaker numbers are voices told apart on the call; rename them from the invite list." }
+        if !order.isEmpty, farName == nil { md += ". Speaker numbers are voices told apart on the call; rename them from the invite list." }
         md += "\n- **Recorded on this Mac by Speakhold.** Audio was transcribed locally and discarded.\n\n"
         if !userNotes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             md += "## Your notes\n\n\(userNotes.trimmingCharacters(in: .whitespacesAndNewlines))\n\n"
@@ -200,10 +216,11 @@ final class MeetingSession {
         if !followUp.isEmpty { md += "## Follow-up draft\n\n\(followUp)\n\n" }
         md += "## Transcript\n\n\(transcript.isEmpty ? "_Nothing recognised._" : transcript)\n"
 
-        let safe = title.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: ".")
-        var url = Self.folder.appendingPathComponent(safe + ".md")
+        let dir = Self.destinationFolder(title: title, calendarTitle: calendarTitle, started: started, rule: settings.notesFolderRule)
+        let safe = Self.fileName(template: settings.notesFilenameTemplate, title: title, calendarTitle: calendarTitle, started: started)
+        var url = dir.appendingPathComponent(safe + ".md")
         var n = 2
-        while FileManager.default.fileExists(atPath: url.path) { url = Self.folder.appendingPathComponent("\(safe) (\(n)).md"); n += 1 }
+        while FileManager.default.fileExists(atPath: url.path) { url = dir.appendingPathComponent("\(safe) (\(n)).md"); n += 1 }
         try md.write(to: url, atomically: true, encoding: .utf8)
         capture.discard()
         return url
@@ -212,6 +229,38 @@ final class MeetingSession {
     static func stamp(_ t: TimeInterval) -> String {
         let s = Int(t)
         return s >= 3600 ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%02d:%02d", s / 60, s % 60)
+    }
+
+    /// `{title}`, `{calendar}`, `{date}` (2026-10-30), `{time}` (14.05), `{month}` (2026-10) in the template (#5).
+    static func fileName(template: String, title: String, calendarTitle: String?, started: Date) -> String {
+        let date = DateFormatter(); date.dateFormat = "yyyy-MM-dd"
+        let time = DateFormatter(); time.dateFormat = "HH.mm"
+        let month = DateFormatter(); month.dateFormat = "yyyy-MM"
+        var name = template.trimmingCharacters(in: .whitespaces).isEmpty ? "{title}" : template
+        name = name.replacingOccurrences(of: "{title}", with: title)
+            .replacingOccurrences(of: "{calendar}", with: (calendarTitle?.isEmpty == false ? calendarTitle! : title))
+            .replacingOccurrences(of: "{date}", with: date.string(from: started))
+            .replacingOccurrences(of: "{time}", with: time.string(from: started))
+            .replacingOccurrences(of: "{month}", with: month.string(from: started))
+        return name.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: ".").trimmingCharacters(in: .whitespaces)
+    }
+
+    static func destinationFolder(title: String, calendarTitle: String?, started: Date, rule: NotesFolderRule) -> URL {
+        let base = Self.folder
+        let sub: String?
+        switch rule {
+        case .flat: sub = nil
+        case .byTitle:
+            let t = (calendarTitle?.isEmpty == false ? calendarTitle! : title)
+            // "Meeting 2026-10-30 14.05" is not a title worth a folder; untitled meetings stay flat.
+            sub = t.hasPrefix("Meeting 20") ? nil : t.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: ".")
+        case .byMonth:
+            let f = DateFormatter(); f.dateFormat = "yyyy-MM"; sub = f.string(from: started)
+        }
+        guard let sub, !sub.isEmpty else { return base }
+        let dir = base.appendingPathComponent(sub)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
     }
 }
 
@@ -275,6 +324,11 @@ enum MeetingNotes {
                 return out
             }
             failure += "Claude did not answer (check the key and the connection). "
+        }
+        // A local model chosen for polish also writes the notes when no Claude path answered (#3).
+        if s.cleanupEngine == .ollama, !s.ollamaModel.isEmpty {
+            if let out = await OllamaClient(baseURL: s.ollamaURL, model: s.ollamaModel).complete(system: brief, user: user, timeout: 600) { return out }
+            failure += "The local model (\(s.ollamaModel) at \(s.ollamaURL)) did not answer. "
         }
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *), Polish.appleAvailable {

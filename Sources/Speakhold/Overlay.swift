@@ -127,7 +127,8 @@ struct OverlayView: View {
     /// the states that carry a sentence (error, meeting, offer) size to their text.
     private var fixedWidth: CGFloat? {
         switch model.phase {
-        case .listening, .transcribing, .cleaning, .meeting, .job: return 88
+        case .listening: return model.liveText.isEmpty ? 88 : nil   // live words (opt-in, #10) size to the text
+        case .transcribing, .cleaning, .meeting, .job: return 88
         case .done(let text): return text.isEmpty ? 88 : nil
         default: return nil
         }
@@ -152,6 +153,10 @@ struct OverlayView: View {
                     Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold)).foregroundStyle(Ink.mint)
                 }
                 Waveform(levels: Array(model.levels.suffix(16))).frame(height: 14)
+                if !model.liveText.isEmpty {
+                    Text(Self.tail(model.liveText)).font(.system(size: 12.5, weight: .medium)).foregroundStyle(Ink.text)
+                        .lineLimit(1).truncationMode(.head).frame(maxWidth: 260, alignment: .trailing)
+                }
             case .transcribing:
                 ThinkingDots(color: Ink.mint)
             case .cleaning:
@@ -220,6 +225,14 @@ struct PillShape: InsettableShape {
             bottomLeading: squareBottom ? 0 : radius,
             bottomTrailing: (squareRight || squareBottom) ? 0 : radius,
             topTrailing: squareRight ? 0 : radius))
+    }
+}
+
+extension OverlayView {
+    /// The last few words of the preview: the pill shows where you are, not the whole sentence.
+    static func tail(_ text: String, words: Int = 7) -> String {
+        let parts = text.split(whereSeparator: \.isWhitespace)
+        return parts.count > words ? "… " + parts.suffix(words).joined(separator: " ") : text
     }
 }
 
