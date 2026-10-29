@@ -7,6 +7,30 @@ import Foundation
 actor ParakeetMeetingTranscriber: MeetingTranscriber {
     private var manager: UnifiedAsrManager?
     private(set) var status = "Not loaded"
+    private var ctc: CtcModels?
+    private var boostedTerms: [String] = []
+
+    /// Personal dictionary inside the decoder (#9): FluidAudio's CTC keyword spotting rescored against the terms.
+    /// The CTC models are a separate download, fetched the first time a non-empty dictionary is set, so this is
+    /// called at model-load time, not from a dictation. Terms under three characters are skipped (false positives).
+    func setVocabulary(_ terms: [String], progress: ((String) -> Void)? = nil) async {
+        let clean = Array(Set(terms.map { $0.trimmingCharacters(in: .whitespaces) }.filter { $0.count >= 3 })).sorted()
+        guard clean != boostedTerms, let manager else { return }
+        do {
+            if ctc == nil, !clean.isEmpty {
+                status = "Downloading dictionary model…"; progress?(status)
+                ctc = try await CtcModels.downloadAndLoad()
+            }
+            guard let ctc else { return }
+            let context = CustomVocabularyContext(terms: clean.map { CustomVocabularyTerm(text: $0) })
+            try await manager.configureVocabularyBoosting(vocabulary: context, ctcModels: ctc)
+            boostedTerms = clean
+            status = "Ready"; progress?(status)
+        } catch {
+            NSLog("Speakhold: Parakeet vocabulary boosting failed: %@", error.localizedDescription)
+            status = "Ready"; progress?(status)
+        }
+    }
 
     func prepare(progress: ((String) -> Void)? = nil) async throws {
         if manager != nil { return }
@@ -28,6 +52,7 @@ actor ParakeetMeetingTranscriber: MeetingTranscriber {
 
     func segments(_ samples: [Float], language: String, promptTerms: [String], progress: (@Sendable (Double) -> Void)?) async throws -> [Transcriber.Segment] {
         try await prepare()
+        await setVocabulary(promptTerms)
         guard let manager else { return [] }
         var out: [Transcriber.Segment] = []
         let regions = Transcriber.speechRegions(samples)

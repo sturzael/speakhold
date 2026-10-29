@@ -26,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     private var isRecording = false
     private var busy = false
     private var targetApp: String?
+    private var targetBundleID: String?
     private var pressedAt: Date?
     private var lastLevelPush = Date.distantPast
     private var settingsObserver: Any?
@@ -592,7 +593,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 }
             }
         }
-        await transcriber.prepare(model: model, engine: Settings.shared.effectiveDictationEngine)
+        await transcriber.prepare(model: model, engine: Settings.shared.effectiveDictationEngine, dictionary: Settings.shared.dictionaryTerms)
     }
 
     /// Settings → "Test microphone": records 3 s from the chosen device, shows the level and the raw transcript.
@@ -649,6 +650,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 return
             }
             targetApp = NSWorkspace.shared.frontmostApplication?.localizedName
+            targetBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
             locked = false
             overlay.model.locked = false
             overlay.model.onUndo = nil
@@ -738,6 +740,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         overlay.show(.transcribing)
         let s = Settings.shared
         let app = targetApp
+        let sendAfter = s.pressesReturn(appName: targetApp, bundleID: targetBundleID)
         Task {
             defer { Task { @MainActor in self.busy = false } }
             do {
@@ -749,7 +752,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 if Polish.willUseModel(s) { await MainActor.run { overlay.show(.cleaning) } }
                 let text = await Polish.run(raw, settings: s, appName: app)
                 await MainActor.run {
-                    Paster.paste(text)
+                    Paster.paste(text, pressReturn: sendAfter)
                     History.shared.add(text, app: app)
                     overlay.model.onUndo = { [weak self] in self?.undoLast() }
                     overlay.show(.done(""))   // just the tick; the text is in the app, and Undo stays on the pill

@@ -19,12 +19,17 @@ actor Transcriber {
 
     private func set(_ s: State) { state = s; onState?(s) }
 
-    func prepare(model: String, engine: DictationEngine = .whisper) async {
+    func prepare(model: String, engine: DictationEngine = .whisper, dictionary: [String] = []) async {
         self.engine = engine
         if engine == .parakeet {
-            if parakeetReady { set(.ready); return }
+            if !parakeetReady {
+                set(.loading)
+                do { try await parakeet.prepare(); parakeetReady = true } catch { set(.failed(error.localizedDescription)); return }
+            }
+            // Dictionary terms go into the decoder via CTC boosting; the first non-empty set downloads the CTC models.
             set(.loading)
-            do { try await parakeet.prepare(); parakeetReady = true; set(.ready) } catch { set(.failed(error.localizedDescription)) }
+            await parakeet.setVocabulary(dictionary)
+            set(.ready)
             return
         }
         if kit != nil, loadedModel == model { set(.ready); return }
@@ -92,13 +97,23 @@ actor Transcriber {
         options.temperatureFallbackCount = fast ? 0 : 2
         options.chunkingStrategy = .vad
         // Bias the decoder toward names it would otherwise mangle.
-        if env["DICTATE_NO_PROMPT"] == nil, !promptTerms.isEmpty, let tok = kit.tokenizer {
+        let prompted = env["DICTATE_NO_PROMPT"] == nil && !promptTerms.isEmpty && kit.tokenizer != nil
+        if prompted, let tok = kit.tokenizer {
             let prompt = " " + promptTerms.joined(separator: ", ") + "."
             options.promptTokens = tok.encode(text: prompt).filter { $0 < tok.specialTokens.specialTokenBegin }
             options.usePrefillPrompt = true
         }
-        let results = try await kit.transcribe(audioArray: audio, decodeOptions: options)
-        let text = results.map(\.text).joined(separator: " ")
+        var results = try await kit.transcribe(audioArray: audio, decodeOptions: options)
+        var text = results.map(\.text).joined(separator: " ")
+        // With a dictionary prompt WhisperKit sometimes returns one empty segment for a clip it transcribes fine
+        // unprompted (seen 30 Oct 2026 on two of three test clips; which clips fail depends on the prompt text).
+        // Decode again without the prompt rather than paste nothing.
+        if prompted, Transcriber.tidy(text).isEmpty {
+            NSLog("Speakhold: prompted Whisper decode came back empty, retrying without the dictionary prompt")
+            options.promptTokens = nil
+            results = try await kit.transcribe(audioArray: audio, decodeOptions: options)
+            text = results.map(\.text).joined(separator: " ")
+        }
         if env["DICTATE_DEBUG"] != nil { NSLog("DEBUG samples=%d results=%d segs=%d text=%@", audio.count, results.count, results.first?.segments.count ?? 0, text) }
         return Transcriber.tidy(text)
     }

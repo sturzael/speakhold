@@ -98,7 +98,7 @@ if let cmd = ["--toggle", "--start", "--stop", "--cancel", "--settings", "--hist
     exit(0)
 }
 
-// `Speakhold --transcribe file.wav [--parakeet] [--no-cleanup]` runs the pipeline headless and prints the result
+// `Speakhold --transcribe file.wav [--parakeet|--whisper] [--dictionary "a, b"] [--no-cleanup]` runs the pipeline headless and prints the result
 // with the decode time, so the two engines can be compared on the same clip.
 if let i = args.firstIndex(of: "--transcribe"), i + 1 < args.count {
     let path = args[i + 1]
@@ -108,10 +108,13 @@ if let i = args.firstIndex(of: "--transcribe"), i + 1 < args.count {
     Task {
         await t.setStateHandler { st in print("model:", st) }
         let engine: DictationEngine = args.contains("--parakeet") ? .parakeet : (args.contains("--whisper") ? .whisper : s.effectiveDictationEngine)
-        await t.prepare(model: s.model.rawValue, engine: engine)
+        // `--dictionary "HubSpot, Smriti"` overrides the saved dictionary for this run (comma-separated).
+        let terms = args.firstIndex(of: "--dictionary").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
+            .map { $0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } } ?? s.dictionaryTerms
+        await t.prepare(model: s.model.rawValue, engine: engine, dictionary: terms)
         do {
             let t0 = Date()
-            let raw = try await t.transcribeFile(path, language: s.language, promptTerms: s.dictionaryTerms)
+            let raw = try await t.transcribeFile(path, language: s.language, promptTerms: terms)
             print("ENGINE:", engine.rawValue, String(format: "%.2f s", Date().timeIntervalSince(t0)))
             print("RAW:", raw)
             if !args.contains("--no-cleanup") {

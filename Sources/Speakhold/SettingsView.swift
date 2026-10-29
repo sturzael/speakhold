@@ -563,6 +563,10 @@ struct SettingsView: View {
             InkCard(title: "Style notes", note: "Optional. How you like things written: “keep it casual”, “never use semicolons”. Applies to either polish engine.") {
                 InkBlock(divider: false) { InkEditor(text: $settings.styleNotes, minHeight: 70) }
             }
+
+            InkCard(title: "Send after pasting", note: "Apps where a dictation is the whole message: Return is pressed right after the text lands, so Claude Code, Slack or a terminal sends it without you reaching for the key. One per line, app name or bundle id (Terminal, Slack, com.apple.Terminal). Empty means never.") {
+                InkBlock(divider: false) { InkEditor(text: $settings.returnAfterPasteApps, mono: true, minHeight: 60) }
+            }
         }
     }
 

@@ -137,6 +137,9 @@ final class Settings: ObservableObject {
     @Published var anthropicKey: String { didSet { d.set(anthropicKey, forKey: "anthropicKey") } }
     @Published var dictionary: String { didSet { d.set(dictionary, forKey: "dictionary") } }
     @Published var styleNotes: String { didSet { d.set(styleNotes, forKey: "styleNotes") } }
+    /// Apps where a dictation is sent as soon as it lands: Return is pressed after the paste. One per line, app name
+    /// or bundle id, case-insensitive. Empty by default (#11).
+    @Published var returnAfterPasteApps: String { didSet { d.set(returnAfterPasteApps, forKey: "returnAfterPasteApps") } }
     @Published var playSounds: Bool { didSet { d.set(playSounds, forKey: "playSounds") } }
     @Published var language: String { didSet { d.set(language, forKey: "language") } }
     @Published var inputDeviceUID: String { didSet { d.set(inputDeviceUID, forKey: "inputDeviceUID") } }
@@ -186,6 +189,7 @@ final class Settings: ObservableObject {
         anthropicKey = d.string(forKey: "anthropicKey") ?? Settings.keyFromEnvironment()
         dictionary = d.string(forKey: "dictionary") ?? ""
         styleNotes = d.string(forKey: "styleNotes") ?? ""
+        returnAfterPasteApps = d.string(forKey: "returnAfterPasteApps") ?? ""
         playSounds = d.object(forKey: "playSounds") as? Bool ?? true
         language = d.string(forKey: "language") ?? "en"
         inputDeviceUID = d.string(forKey: "inputDeviceUID") ?? ""
@@ -207,6 +211,15 @@ final class Settings: ObservableObject {
     static func keyFromEnvironment() -> String {
         let v = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"] ?? ""
         return v.hasPrefix("sk-ant-api") ? v : ""
+    }
+
+    /// True when the frontmost app (by localised name or bundle id) is on the Return-after-paste list.
+    func pressesReturn(appName: String?, bundleID: String?) -> Bool {
+        let wanted = returnAfterPasteApps.split(whereSeparator: { $0 == "\n" || $0 == "," })
+            .map { $0.trimmingCharacters(in: .whitespaces).lowercased() }.filter { !$0.isEmpty }
+        guard !wanted.isEmpty else { return false }
+        let name = appName?.lowercased() ?? "", bundle = bundleID?.lowercased() ?? ""
+        return wanted.contains { !$0.isEmpty && ($0 == name || $0 == bundle || (!bundle.isEmpty && bundle.hasSuffix("." + $0))) }
     }
 
     var dictionaryTerms: [String] {

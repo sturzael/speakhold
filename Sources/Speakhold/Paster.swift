@@ -3,7 +3,9 @@ import Carbon.HIToolbox
 
 /// Puts text on the pasteboard, sends ⌘V to the frontmost app, then restores what was there.
 enum Paster {
-    static func paste(_ text: String) {
+    /// `pressReturn` sends Return a moment after the paste, for chat apps and terminals where the dictation is the
+    /// whole message (#11). The delay lets the target app finish inserting the text first.
+    static func paste(_ text: String, pressReturn: Bool = false) {
         let pb = NSPasteboard.general
         let previous = pb.string(forType: .string)
         pb.clearContents()
@@ -17,6 +19,13 @@ enum Paster {
         up?.flags = .maskCommand
         down?.post(tap: .cghidEventTap)
         up?.post(tap: .cghidEventTap)
+        if pressReturn {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                let ret = CGKeyCode(kVK_Return)
+                CGEvent(keyboardEventSource: src, virtualKey: ret, keyDown: true)?.post(tap: .cghidEventTap)
+                CGEvent(keyboardEventSource: src, virtualKey: ret, keyDown: false)?.post(tap: .cghidEventTap)
+            }
+        }
 
         // Give the target app time to read the pasteboard before restoring the user's clipboard.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {

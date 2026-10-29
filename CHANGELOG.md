@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Dictionary inside Parakeet** (#9). Terms from Settings → Cleanup → Dictionary are now applied in the decoder on the Parakeet path too, through FluidAudio's CTC keyword spotting (a ~110M-parameter model downloaded once, the first time a non-empty dictionary is set, at model-load time rather than mid-dictation). On a synthesised clip "Smridi" became "Smriti" with the term in the dictionary. Terms under three characters are skipped. Homophones that are also real words ("sync" over "sink") are not rescued; the cleanup pass still handles those.
+- **Send after pasting** (#11). Settings → Cleanup → Send after pasting: a list of apps (name or bundle id) where Return is pressed right after the paste, so a dictation into Claude Code, Slack or a terminal is sent without reaching for the key. Empty by default.
+- **Whisper no longer goes silent with a dictionary.** With a prompt built from the dictionary, WhisperKit sometimes returned one empty segment for a clip it transcribed fine unprompted (two of three test clips on 30 Oct). The transcriber now decodes again without the prompt when that happens, so a dictation is never dropped.
+- `--transcribe` takes `--dictionary "a, b"` to test terms headless.
 - Meetings settings note no longer says Whisper is already loaded for dictation (Parakeet is the shared default since 0.2.3).
 
 ## 0.2.3 — 2026-10-30
