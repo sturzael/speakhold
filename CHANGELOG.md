@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.4 — 2026-11-02
 
 - **Local model (Ollama) as a polish and notes engine** (#3). Settings → Cleanup → Polish with → Local model: a server URL (default http://127.0.0.1:11434) and a model name. Polishes dictation, and writes the meeting notes when no Claude path answers. Nothing leaves the Mac unless the URL points off it. Prefaces and quotes that small models add are stripped.
 - **Style by app** (#2). Settings → Cleanup → Style by app: one line per app, "Slack: casual, short", matched on the app you dictate into and added to the style notes for that paste.
